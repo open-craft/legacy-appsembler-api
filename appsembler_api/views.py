@@ -64,7 +64,7 @@ log = logging.getLogger(__name__)
 
 class CreateUserAccountView(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         """
@@ -125,7 +125,7 @@ class CreateUserAccountView(APIView):
 
 class CreateUserAccountWithoutPasswordView(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         """
@@ -179,7 +179,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
 
 class UserAccountConnect(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         """
@@ -251,7 +251,7 @@ class UpdateUserAccount(APIView):
     """ HTTP endpoint for updating and user account """
 
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         """
@@ -281,7 +281,7 @@ class UpdateUserAccount(APIView):
         """
         data = request.data
 
-        if not unicode(data.get('user_lookup', '')).strip():
+        if not str(data.get('user_lookup', '')).strip():
             errors = {"lookup_error": "No user lookup has been provided"}
             return Response(errors, status=400)
 
@@ -343,13 +343,13 @@ class UpdateUserAccount(APIView):
         return Response({
             "success": "The following fields has been updated: {}".format(
                 ', '.join(
-                    '{}={}'.format(f, v) for f, v in updated_fields.items()))
+                    '{}={}'.format(f, v) for f, v in list(updated_fields.items())))
         }, status=200)
 
 
 class GetUserAccountView(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def get(self, request, username):
         """
@@ -379,7 +379,7 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser, \
         EnrollmentCrossDomainSessionAuth
     permission_classes = ApiKeyHeaderPermissionIsAuthenticated,
-    throttle_classes = EnrollmentUserThrottle,
+    throttle_classes = EnrollmentUserThrottle
 
     def post(self, request):
         serializer = BulkEnrollmentSerializer(data=request.data)
@@ -406,7 +406,7 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
 class GenerateRegistrationCodesView(APIView):
     authentication_classes = (OAuth2AuthenticationAllowInactiveUser,
                               EnrollmentCrossDomainSessionAuth)
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         course_id = CourseKey.from_string(request.data.get('course_id'))
@@ -444,7 +444,7 @@ class GenerateRegistrationCodesView(APIView):
 class EnrollUserWithEnrollmentCodeView(APIView):
     authentication_classes = (OAuth2AuthenticationAllowInactiveUser,
                               EnrollmentCrossDomainSessionAuth)
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         enrollment_code = request.data.get('enrollment_code')
@@ -509,7 +509,7 @@ class EnrollmentCodeStatusView(APIView):
     again.
     """
     authentication_classes = OAuth2AuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def post(self, request):
         code = request.data.get('enrollment_code')
@@ -548,7 +548,7 @@ class EnrollmentCodeStatusView(APIView):
 
 class GetBatchUserDataView(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def get(self, request):
         """
@@ -690,13 +690,13 @@ class CourseListSearchView(DeveloperErrorViewMixin, ListAPIView):
 
         return [
             course for course in courses_db
-            if unicode(course.id) in course_search_ids
+            if str(course.id) in course_search_ids
         ]
 
 
 class GetBatchEnrollmentDataView(APIView):
     authentication_classes = OAuth2AuthenticationAllowInactiveUser,
-    permission_classes = IsStaffOrOwner,
+    permission_classes = IsStaffOrOwner
 
     def get(self, request):
         """
