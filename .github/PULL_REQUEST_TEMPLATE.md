@@ -1,18 +1,29 @@
-# Overview
-What do we need to know about this change?
+## Change description
 
-# Test Instructions
-- Checkout the branch
-- Update settings?
-- Anything else?
+> Description here
+## Type of change
+- [ ] Bug fix (fixes an issue)
+- [ ] New feature (adds functionality)
 
-# TODO
-- [ ] Compile static assets
-- [ ] Lint all files
-- [ ] Pass all tests
-- [ ] Bump the version number in `setup.py`
-- [ ] Attach screenshots?
-- [ ] Code Reviewer 1:
-- [ ] Code Reviewer 2:
-- [ ] Submit PR against `edx-platform` to bump the version
-- [ ] Upload to PyPi
+## Related issues
+
+> Fix [#1]() 
+## Checklists
+
+### Development
+
+- [ ] Lint rules pass locally
+- [ ] Application changes have been tested thoroughly
+- [ ] Automated tests covering modified code pass
+
+### Security
+
+- [ ] Security impact of change has been considered
+- [ ] Code follows company security practices and guidelines
+
+### Code review
+
+- [ ] Pull request has a descriptive title and context useful to a reviewer. Screenshots or screencasts are attached as necessary
+- [ ] "Ready for review" label attached and reviewers assigned
+- [ ] Changes have been reviewed by at least one other contributor
+- [ ] Pull request linked to task tracker where applicable
