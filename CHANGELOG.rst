@@ -22,4 +22,4 @@ Unreleased
 Added
 _____
 
-* First release on PyPI.
+* First release as a standalone repo.
