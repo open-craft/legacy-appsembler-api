@@ -97,7 +97,7 @@ if sys.argv[-1] == 'tag':
     os.system("git push --tags")
     sys.exit()
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding="utf8").read()
+README = open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding="utf8").read()
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst'), encoding="utf8").read()
 
 setup(
@@ -105,15 +105,15 @@ setup(
     version=VERSION,
     description="""Provides otherwise deprecated appsembler_api as a plugin LMS app""",
     long_description=README + '\n\n' + CHANGELOG,
-    author='edX',
-    author_email='oscm@edx.org',
-    url='https://github.com/edx/legacy-appsembler-api',
+    author='Appsembler, Inc.',
+    author_email='john@appsembler.com',
+    url='https://github.com/appsembler/legacy-appsembler-api',
     packages=[
         'appsembler_api',
     ],
     include_package_data=True,
     install_requires=load_requirements('requirements/base.in'),
-    python_requires=">=3.8",
+    python_requires=">=3.5",
     zip_safe=False,
     keywords='Python edx',
     classifiers=[
@@ -124,6 +124,11 @@ setup(
         'License :: Other/Proprietary License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.5',
     ],
+    entry_points={
+        'lms.djangoapp': [
+            'appsembler_api = appsembler_api.apps:AppsemblerApiConfig'
+        ]
+    }    
 )
