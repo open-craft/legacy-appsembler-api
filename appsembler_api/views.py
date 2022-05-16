@@ -48,7 +48,7 @@ from openedx.core.djangoapps.enrollments.views import EnrollmentCrossDomainSessi
     EnrollmentUserThrottle, ApiKeyPermissionMixIn
 
 from lms.djangoapps.instructor.views.api import save_registration_code, \
-    students_update_enrollment, require_level
+    students_update_enrollment
 
 from lms.djangoapps.shoppingcart.exceptions import RedemptionCodeError
 from lms.djangoapps.shoppingcart.models import (
