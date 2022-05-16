@@ -33,8 +33,12 @@ from openedx.core.lib.api.permissions import (
     IsStaffOrOwner, ApiKeyHeaderPermissionIsAuthenticated
 )
 
-from student.forms import get_registration_extension_form
-from student.views import create_account_with_params, validate_new_email
+from openedx.core.djangoapps.user_authn.views.register import create_account_with_params
+from openedx.core.djangoapps.user_authn.views.registration_form import (
+    get_registration_extension_form
+)
+
+from student.views import validate_new_email
 from student.models import CourseEnrollment, EnrollmentClosedError, \
     CourseFullError, AlreadyEnrolledError, UserProfile
 
@@ -56,6 +60,7 @@ from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.certificates.models import GeneratedCertificate
 
 from openedx.core.lib.api.view_utils import view_auth_classes, DeveloperErrorViewMixin
+
 from .forms import CourseListGetAndSearchForm
 from .serializers import BulkEnrollmentSerializer
 from .utils import auto_generate_username, send_activation_email
