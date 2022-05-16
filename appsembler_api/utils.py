@@ -6,9 +6,10 @@ from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-from openedx.core.djangoapps.user_api.accounts.api import check_account_exists
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from student.forms import PasswordResetFormNoActive
+
+from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 
 
 def auto_generate_username(email):
@@ -24,7 +25,7 @@ def auto_generate_username(email):
 
     username = ''.join(e for e in email.split('@')[0] if e.isalnum())
 
-    while check_account_exists(username=username):
+    while account_exists(username=username, email=None):
         username = ''.join(e for e in email.split('@')[0] if e.isalnum()) + str(randint(100, 999))
 
     return username
