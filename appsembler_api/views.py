@@ -23,7 +23,8 @@ from util.disable_rate_limit import can_disable_rate_limit
 
 from lms.djangoapps.course_api.api import list_courses
 from lms.djangoapps.course_api.serializers import CourseSerializer
-from openedx.core.djangoapps.user_api.accounts.api import check_account_exists
+
+from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 from openedx.core.lib.api.authentication import (
     OAuth2AuthenticationAllowInactiveUser,
 )
@@ -101,7 +102,7 @@ class CreateUserAccountView(APIView):
         username = request.data.get('username')
 
         # Handle duplicate email/username
-        conflicts = check_account_exists(email=email, username=username)
+        conflicts = account_exists(email=email, username=username)
         if conflicts:
             errors = {"user_message": "User already exists"}
             return Response(errors, status=409)
@@ -141,7 +142,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
         email = request.data.get('email')
 
         # Handle duplicate email/username
-        conflicts = check_account_exists(email=email)
+        conflicts = account_exists(email=email, username=None)
         if conflicts:
             errors = {"user_message": "User already exists"}
             return Response(errors, status=409)
@@ -219,7 +220,7 @@ class UserAccountConnect(APIView):
                 try:
                     validate_email(new_email)
 
-                    if check_account_exists(email=new_email):
+                    if account_exists(email=new_email, username=None):
                         errors = {
                             "user_message": "The email %s is in use by another user" % (new_email)}
                         return Response(errors, status=409)
