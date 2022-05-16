@@ -18,7 +18,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 
-from util.bad_request_rate_limiter import BadRequestRateLimiter
+from util.request_rate_limiter import BadRequestRateLimiter
 from util.disable_rate_limit import can_disable_rate_limit
 
 from lms.djangoapps.course_api.api import list_courses
