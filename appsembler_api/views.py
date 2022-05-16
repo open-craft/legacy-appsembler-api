@@ -50,11 +50,11 @@ from openedx.core.djangoapps.enrollments.views import EnrollmentCrossDomainSessi
 from lms.djangoapps.instructor.views.api import save_registration_code, \
     students_update_enrollment
 
-from lms.djangoapps.shoppingcart.exceptions import RedemptionCodeError
-from lms.djangoapps.shoppingcart.models import (
+from shoppingcart.exceptions import RedemptionCodeError
+from shoppingcart.models import (
     RegistrationCodeRedemption, CourseRegistrationCode
 )
-from lms.djangoapps.shoppingcart.views import get_reg_code_validity
+from shoppingcart.views import get_reg_code_validity
 
 from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.certificates.models import GeneratedCertificate
