@@ -34,9 +34,9 @@ from openedx.core.lib.api.permissions import (
 )
 
 from openedx.core.djangoapps.user_authn.views.register import create_account_with_params
-from openedx.core.djangoapps.user_authn.views.registration_form import (
+from openedx.core.djangoapps.user_authn.views.registration_form import \
     get_registration_extension_form
-)
+
 
 from student.views import validate_new_email
 from student.models import CourseEnrollment, EnrollmentClosedError, \
@@ -44,7 +44,7 @@ from student.models import CourseEnrollment, EnrollmentClosedError, \
 
 from course_modes.models import CourseMode
 from courseware.courses import get_course_by_id
-from enrollment.views import EnrollmentCrossDomainSessionAuth, \
+from openedx.core.djangoapps.enrollments.views import EnrollmentCrossDomainSessionAuth, \
     EnrollmentUserThrottle, ApiKeyPermissionMixIn
 
 from instructor.views.api import save_registration_code, \
