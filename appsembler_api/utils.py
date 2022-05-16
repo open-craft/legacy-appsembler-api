@@ -7,7 +7,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
-from student.forms import PasswordResetFormNoActive
+from openedx.core.djangoapps.user_authn.views.password_reset import PasswordResetFormNoActive
 
 from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 
