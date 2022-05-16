@@ -16,8 +16,8 @@ class AppsemblerApiConfig(AppConfig):
     plugin_app = {
         PluginURLs.CONFIG: {
             ProjectType.LMS: {
-                PluginURLs.NAMESPACE: u'',
-                PluginURLs.REGEX: r'^courses/{}/discussion/forum/'.format(COURSE_ID_PATTERN),
+                PluginURLs.NAMESPACE: u'appsembler_api',
+                PluginURLs.REGEX: '^appsembler_api/v0/',
                 PluginURLs.RELATIVE_PATH: u'urls',
             }
         },
