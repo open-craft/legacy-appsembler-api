@@ -7,7 +7,6 @@ import search
 from dateutil import parser
 
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
-from django.db import transaction
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import Http404
