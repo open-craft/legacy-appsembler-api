@@ -391,7 +391,7 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
     def post(self, request):
         serializer = BulkEnrollmentSerializer(data=request.data)
         if serializer.is_valid():
-            request.POST = request.data
+            request._request.POST = request.data
             response_dict = {
                 'auto_enroll': serializer.data.get('auto_enroll'),
                 'email_students': serializer.data.get('email_students'),
@@ -400,9 +400,9 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
             }
             for course in serializer.data.get('courses'):
                 response = students_update_enrollment(
-                    self.request, course_id=course
+                    request._request, course_id=course
                 )
-                response_dict['courses'][course] = json.loads(response.content)
+                response_dict['courses'][course] = json.loads(response.content.decode('utf-8'))
             return Response(data=response_dict, status=status.HTTP_200_OK)
         else:
             return Response(
