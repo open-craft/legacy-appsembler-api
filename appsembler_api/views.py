@@ -25,9 +25,8 @@ from lms.djangoapps.course_api.api import list_courses
 from lms.djangoapps.course_api.serializers import CourseSerializer
 
 from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
-from openedx.core.lib.api.authentication import (
-    OAuth2AuthenticationAllowInactiveUser,
-)
+from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
+
 from edx_rest_framework_extensions.paginators import NamespacedPageNumberPagination
 from openedx.core.lib.api.permissions import (
     IsStaffOrOwner, ApiKeyHeaderPermissionIsAuthenticated
@@ -69,7 +68,7 @@ log = logging.getLogger(__name__)
 
 
 class CreateUserAccountView(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def post(self, request):
@@ -130,7 +129,7 @@ class CreateUserAccountView(APIView):
 
 
 class CreateUserAccountWithoutPasswordView(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def post(self, request):
@@ -184,7 +183,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
 
 
 class UserAccountConnect(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def post(self, request):
@@ -256,7 +255,7 @@ class UserAccountConnect(APIView):
 class UpdateUserAccount(APIView):
     """ HTTP endpoint for updating and user account """
 
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def post(self, request):
@@ -354,7 +353,7 @@ class UpdateUserAccount(APIView):
 
 
 class GetUserAccountView(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def get(self, request, username):
@@ -382,7 +381,7 @@ class GetUserAccountView(APIView):
 
 @can_disable_rate_limit
 class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser, \
+    authentication_classes = BearerAuthenticationAllowInactiveUser, \
         EnrollmentCrossDomainSessionAuth
     permission_classes = ApiKeyHeaderPermissionIsAuthenticated,
     throttle_classes = EnrollmentUserThrottle
@@ -410,7 +409,7 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
 
 
 class GenerateRegistrationCodesView(APIView):
-    authentication_classes = (OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = (BearerAuthenticationAllowInactiveUser,
                               EnrollmentCrossDomainSessionAuth)
     permission_classes = IsStaffOrOwner
 
@@ -448,7 +447,7 @@ class GenerateRegistrationCodesView(APIView):
 
 
 class EnrollUserWithEnrollmentCodeView(APIView):
-    authentication_classes = (OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = (BearerAuthenticationAllowInactiveUser,
                               EnrollmentCrossDomainSessionAuth)
     permission_classes = IsStaffOrOwner
 
@@ -514,7 +513,7 @@ class EnrollmentCodeStatusView(APIView):
     restore: If the code was user for enroll an user, the user is unenrolled and the code becomes available for use it
     again.
     """
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth
+    authentication_classes = BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth
     permission_classes = IsStaffOrOwner
 
     def post(self, request):
@@ -553,7 +552,7 @@ class EnrollmentCodeStatusView(APIView):
 
 
 class GetBatchUserDataView(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def get(self, request):
@@ -701,7 +700,7 @@ class CourseListSearchView(DeveloperErrorViewMixin, ListAPIView):
 
 
 class GetBatchEnrollmentDataView(APIView):
-    authentication_classes = OAuth2AuthenticationAllowInactiveUser,
+    authentication_classes = BearerAuthenticationAllowInactiveUser,
     permission_classes = IsStaffOrOwner
 
     def get(self, request):
