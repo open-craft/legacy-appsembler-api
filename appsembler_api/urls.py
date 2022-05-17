@@ -1,12 +1,19 @@
 from django.conf.urls import url
+from django.db import transaction
 
 from appsembler_api import views
 
 
 urlpatterns = [
     # user API
-    url(r'^accounts/user_without_password', views.CreateUserAccountWithoutPasswordView.as_view(), name="create_user_account_without_password_api"),
-    url(r'^accounts/create', views.CreateUserAccountView.as_view(), name="create_user_account_api"),
+    url(r'^accounts/user_without_password', 
+        transaction.non_atomic_requests(views.CreateUserAccountWithoutPasswordView.as_view()),
+        name="create_user_account_without_password_api"
+    ),
+    url(r'^accounts/create', 
+        transaction.non_atomic_requests(views.CreateUserAccountView.as_view()),
+        name="create_user_account_api"
+    ),
     url(r'^accounts/connect', views.UserAccountConnect.as_view(), name="user_account_connect_api"),
     url(r'^accounts/update_user', views.UpdateUserAccount.as_view(), name="user_account_update_user"),
     url(r'^accounts/get-user/(?P<username>[\w.+-]+)', views.GetUserAccountView.as_view(), name="get_user_account_api"),
