@@ -71,7 +71,6 @@ class CreateUserAccountView(APIView):
     authentication_classes = (BearerAuthenticationAllowInactiveUser,)
     permission_classes = (IsStaffOrOwner,)
 
-    @transaction.non_atomic_requests
     def post(self, request):
         """
         Creates a new user account
@@ -133,7 +132,6 @@ class CreateUserAccountWithoutPasswordView(APIView):
     authentication_classes = (BearerAuthenticationAllowInactiveUser,)
     permission_classes = (IsStaffOrOwner,)
 
-    @transaction.non_atomic_requests
     def post(self, request):
         """
 
