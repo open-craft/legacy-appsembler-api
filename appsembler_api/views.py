@@ -1,68 +1,57 @@
 import json
 import logging
-import string
 import random
+import string
 
 import search
+from course_modes.models import CourseMode
+from courseware.courses import get_course_by_id
 from dateutil import parser
-
-from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
-from django.urls import reverse
 from django.contrib.auth.models import User
-from django.http import Http404
-from django.db.models import Q
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import validate_email
-from rest_framework.generics import ListAPIView
-
-from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.response import Response
-
-from util.request_rate_limiter import BadRequestRateLimiter
-from util.disable_rate_limit import can_disable_rate_limit
-
+from django.db.models import Q
+from django.http import Http404
+from django.urls import reverse
+from edx_rest_framework_extensions.paginators import NamespacedPageNumberPagination
+from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.course_api.api import list_courses
 from lms.djangoapps.course_api.serializers import CourseSerializer
-
+from lms.djangoapps.instructor.views.api import save_registration_code, students_update_enrollment
+from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
-from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
-
-from edx_rest_framework_extensions.paginators import NamespacedPageNumberPagination
-from openedx.core.lib.api.permissions import (
-    IsStaffOrOwner, ApiKeyHeaderPermissionIsAuthenticated
+from openedx.core.djangoapps.enrollments.views import (
+    ApiKeyPermissionMixIn,
+    EnrollmentCrossDomainSessionAuth,
+    EnrollmentUserThrottle,
 )
-
 from openedx.core.djangoapps.user_authn.views.register import create_account_with_params
 from openedx.core.djangoapps.user_authn.views.registration_form import \
     get_registration_extension_form
-
-
-from student.views import validate_new_email
-from student.models import CourseEnrollment, EnrollmentClosedError, \
-    CourseFullError, AlreadyEnrolledError, UserProfile
-
-from course_modes.models import CourseMode
-from courseware.courses import get_course_by_id
-from openedx.core.djangoapps.enrollments.views import EnrollmentCrossDomainSessionAuth, \
-    EnrollmentUserThrottle, ApiKeyPermissionMixIn
-
-from lms.djangoapps.instructor.views.api import save_registration_code, \
-    students_update_enrollment
-
+from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
+from openedx.core.lib.api.permissions import ApiKeyHeaderPermissionIsAuthenticated, IsStaffOrOwner
+from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
+from rest_framework import status
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from shoppingcart.exceptions import RedemptionCodeError
-from shoppingcart.models import (
-    RegistrationCodeRedemption, CourseRegistrationCode
-)
+from shoppingcart.models import CourseRegistrationCode, RegistrationCodeRedemption
 from shoppingcart.views import get_reg_code_validity
-
-from opaque_keys.edx.keys import CourseKey
-from lms.djangoapps.certificates.models import GeneratedCertificate
-
-from openedx.core.lib.api.view_utils import view_auth_classes, DeveloperErrorViewMixin
-
+from student.models import (
+        AlreadyEnrolledError,
+        CourseEnrollment,
+        CourseFullError,
+        EnrollmentClosedError,
+        UserProfile
+)
+from student.views import validate_new_email
+from util.disable_rate_limit import can_disable_rate_limit
+from util.request_rate_limiter import BadRequestRateLimiter
 from .forms import CourseListGetAndSearchForm
 from .serializers import BulkEnrollmentSerializer
 from .utils import auto_generate_username, send_activation_email
+
 
 log = logging.getLogger(__name__)
 
@@ -468,7 +457,7 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             user_is_valid = False
             error_reason = "User not found"
         try:
-            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(
+            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(  # pylint: disable=line-too-long
                 enrollment_code,
                 request,
                 limiter
@@ -479,7 +468,7 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             error_reason = "Enrollment code not found"
         if user_is_valid and reg_code_is_valid:
             course = get_course_by_id(course_registration.course_id, depth=0)
-            redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(
+            redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(  # pylint: disable=line-too-long
                 course_registration,
                 user)
             try:
@@ -513,11 +502,12 @@ class EnrollUserWithEnrollmentCodeView(APIView):
 
 class EnrollmentCodeStatusView(APIView):
     """
-    This endpoint controls the status of the enrollment codes. Receives two parameters: enrollment_code and the action
-    cancel or restore.
-    cancel: If the code was user for enroll an user, the user is unenrolled and the code becomes unavailable.
-    restore: If the code was user for enroll an user, the user is unenrolled and the code becomes available for use it
-    again.
+    This endpoint controls the status of the enrollment codes. Receives two parameters:
+    enrollment_code and the action cancel or restore.
+    cancel: If the code was user for enroll an user, the user is unenrolled and the code becomes
+    unavailable.
+    restore: If the code was user for enroll an user, the user is unenrolled and the code becomes
+    available for use it again.
     """
     authentication_classes = (
         BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth
@@ -537,12 +527,16 @@ class EnrollmentCodeStatusView(APIView):
                 status=400
             )
         # check if the code was in use (redeemed)
-        redemption = RegistrationCodeRedemption.get_registration_code_redemption(registration_code.code,
-                                                                                 registration_code.course_id)
+        redemption = RegistrationCodeRedemption.get_registration_code_redemption(
+            registration_code.code, registration_code.course_id
+        )
         if action == 'cancel':
             if redemption:
-                # if was redeemed, unenroll the user from the course and delete the redemption object.
-                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
+                # if was redeemed, unenroll the user from the course and delete the
+                # redemption object.
+                CourseEnrollment.unenroll(
+                    redemption.course_enrollment.user, registration_code.course_id
+                )
                 redemption.delete()
             # make the enrollment code unavailable
             registration_code.is_valid = False
@@ -550,8 +544,11 @@ class EnrollmentCodeStatusView(APIView):
 
         if action == 'restore':
             if redemption:
-                # if was redeemed, unenroll the user from the course and delete the redemption object.
-                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
+                # if was redeemed, unenroll the user from the course and delete the
+                # redemption object.
+                CourseEnrollment.unenroll(
+                    redemption.course_enrollment.user, registration_code.course_id
+                )
                 redemption.delete()
             # make the enrollment code available
             registration_code.is_valid = True
@@ -683,7 +680,9 @@ class CourseListSearchView(DeveloperErrorViewMixin, ListAPIView):
         """
         Return a list of courses visible to the user.
         """
-        form = CourseListGetAndSearchForm(self.request.query_params, initial={'requesting_user': self.request.user})
+        form = CourseListGetAndSearchForm(
+            self.request.query_params, initial={'requesting_user': self.request.user}
+        )
         if not form.is_valid():
             raise ValidationError(form.errors)
 
@@ -764,7 +763,9 @@ class GetBatchEnrollmentDataView(APIView):
                 'date_enrolled': enrollment.created,
             }
             try:
-                cert = GeneratedCertificate.objects.get(course_id=enrollment.course_id, user=enrollment.user)
+                cert = GeneratedCertificate.objects.get(
+                    course_id=enrollment.course_id, user=enrollment.user
+                )
                 enrollment_data['certificate'] = {
                     'completion_date': str(cert.created_date),
                     'grade': cert.grade,

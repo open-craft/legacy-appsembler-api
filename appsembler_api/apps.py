@@ -3,8 +3,7 @@ appsembler_api Django application initialization.
 """
 
 from django.apps import AppConfig
-
-from openedx.core.djangoapps.plugins.constants import PluginSettings, PluginURLs, ProjectType, SettingsType
+from openedx.core.djangoapps.plugins.constants import PluginURLs, ProjectType
 
 
 class AppsemblerApiConfig(AppConfig):
@@ -16,9 +15,9 @@ class AppsemblerApiConfig(AppConfig):
     plugin_app = {
         PluginURLs.CONFIG: {
             ProjectType.LMS: {
-                PluginURLs.NAMESPACE: u'appsembler_api',
+                PluginURLs.NAMESPACE: 'appsembler_api',
                 PluginURLs.REGEX: '^appsembler_api/v0/',
-                PluginURLs.RELATIVE_PATH: u'urls',
+                PluginURLs.RELATIVE_PATH: 'urls',
             }
         },
     }

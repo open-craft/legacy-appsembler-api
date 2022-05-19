@@ -1,3 +1,7 @@
+"""
+Serializers for appsembler_api DRF API
+"""
+
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import serializers
