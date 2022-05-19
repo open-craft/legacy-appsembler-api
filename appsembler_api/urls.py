@@ -12,7 +12,7 @@ urlpatterns = [
         transaction.non_atomic_requests(views.CreateUserAccountWithoutPasswordView.as_view()),
         name="create_user_account_without_password_api"
     ),
-    url(r'^accounts/create',
+    url(r'^accounts/create', 
         transaction.non_atomic_requests(views.CreateUserAccountView.as_view()),
         name="create_user_account_api"
     ),
