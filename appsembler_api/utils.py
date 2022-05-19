@@ -1,15 +1,16 @@
-import re
+"""
+utility functions for API classes.
+"""
 
 from random import randint
 
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-
+from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_authn.views.password_reset import PasswordResetFormNoActive
 
-from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 
 
 def auto_generate_username(email):

@@ -9,4 +9,8 @@ another service.
 
 Currently maintained for standalone customers.
 
+Primary authors were @johnbaldwin, @melvinsoft
+
+Updated for standalone, Juniper/Py3 by @bryanlandia
+
 See [apidocs.md](./appsembler_api/apidocs.md) for details on usage/the API

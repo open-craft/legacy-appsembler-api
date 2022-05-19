@@ -1,12 +1,14 @@
+# pylint: disable=line-too-long,
+
 from django.conf.urls import url
 from django.db import transaction
 
 from appsembler_api import views
 
-
 urlpatterns = [
     # user API
-    url(r'^accounts/user_without_password', 
+    url(
+        r'^accounts/user_without_password',
         transaction.non_atomic_requests(views.CreateUserAccountWithoutPasswordView.as_view()),
         name="create_user_account_without_password_api"
     ),
@@ -25,8 +27,8 @@ urlpatterns = [
     url(r'^bulk-enrollment/bulk-enroll', views.BulkEnrollView.as_view(), name="bulk_enrollment_api"),
 
     # enrollment codes API
-    url(r'^enrollment-codes/generate', views.GenerateRegistrationCodesView.as_view(), name="generate_registration_codes_api"),
-    url(r'^enrollment-codes/enroll-user', views.EnrollUserWithEnrollmentCodeView.as_view(), name="enroll_use_with_code_api"),
+    url(r'^enrollment-codes/generate', views.GenerateRegistrationCodesView.as_view(), name="generate_registration_codes_api"),  # pylint: disable=line-too-long
+    url(r'^enrollment-codes/enroll-user', views.EnrollUserWithEnrollmentCodeView.as_view(), name="enroll_use_with_code_api"),  # pylint: disable=line-too-long
     url(r'^enrollment-codes/status', views.EnrollmentCodeStatusView.as_view(), name="enrollment_code_status_api"),
 
     # enrollment analytics API

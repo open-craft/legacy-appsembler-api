@@ -1,5 +1,8 @@
-from django.forms import CharField
+"""
+Course Search Form mods for API.
+"""
 
+from django.forms import CharField
 from lms.djangoapps.course_api.forms import CourseListGetForm
 
 

@@ -232,10 +232,10 @@ Cache-Control: no-cache
 	"level_of_education": "m",
 	"year_of_birth": "2000",
 	"city": "Montevideo",
-	"mailing_address": "A streen and a number 2345 FL, USA",
+	"mailing_address": "A street and a number 2345 FL, USA",
 	"language": "es",
 	"goals": "To be famous",
-	"bio": "I'm not famous yet"
+	"bio": "I'm not famous yet",
 	"district": "101815" # a custom form field
 }
 ```
@@ -468,10 +468,9 @@ Cache-Control: no-cache
 	"action": "enroll",
 	"auto_enroll": true,
 	"identifiers": "test@appsembler.com,test1@appsembler.com,test2@appsembler.
-	com ",
+	com",
 	"email_students": true,
-	"courses": "course-v1:edX+DemoX+Demo_Course,course-v1:Appsembler+APP101+1Q
-	2016 "
+	"courses": "course-v1:edX+DemoX+Demo_Course,course-v1:Appsembler+APP101+1Q2016"
 }
 ```
 

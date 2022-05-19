@@ -18,7 +18,7 @@ def get_version(*file_paths):
                    version string
     """
     filename = os.path.join(os.path.dirname(__file__), *file_paths)
-    version_file = open(filename, encoding="utf8").read()
+    version_file = open(filename).read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
     if version_match:
@@ -53,9 +53,11 @@ def load_requirements(*requirements_paths):
                                     ' "{existing_version_constraints}" and "{version_constraints}".'
                                     'Combine constraints into one location with {package}'
                                     '{existing_version_constraints},{version_constraints}.'.format(
-                                    package=package, existing_version_constraints=existing_version_constraints,
-                                    version_constraints=version_constraints
-                ))
+                                        package=package,
+                                        existing_version_constraints=existing_version_constraints,
+                                        version_constraints=version_constraints
+                                    )
+                )
             if add_if_not_present or package in current_requirements:
                 current_requirements[package] = version_constraints
 
@@ -67,7 +69,8 @@ def load_requirements(*requirements_paths):
                 if is_requirement(line):
                     add_version_constraint_or_raise(line, requirements, True)
                 if line and line.startswith('-c') and not line.startswith('-c http'):
-                    constraint_files.add(os.path.dirname(path) + '/' + line.split('#')[0].replace('-c', '').strip())
+                    constraint_files.add(os.path.dirname(path) + '/' +
+                        line.split('#')[0].replace('-c', '').strip())
 
     # process constraint files: add constraints to existing requirements
     for constraint_file in constraint_files:
@@ -101,8 +104,8 @@ if sys.argv[-1] == 'tag':
     os.system("git push --tags")
     sys.exit()
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding="utf8").read()
-CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst'), encoding="utf8").read()
+README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
+CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst')).read()
 
 setup(
     name='legacy-appsembler-api',
@@ -134,5 +137,5 @@ setup(
         'lms.djangoapp': [
             'appsembler_api = appsembler_api.apps:AppsemblerApiConfig'
         ]
-    }    
+    }
 )
