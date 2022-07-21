@@ -1,5 +1,6 @@
 import json
 import logging
+import pytz
 import random
 import string
 
@@ -730,7 +731,8 @@ class GetBatchEnrollmentDataView(APIView):
         course_id = request.GET.get('course_id')
         username = request.GET.get('username')
 
-        query_filter = {}
+        enrollment_query_filter = {}
+        cert_query_filter = {}
 
         if course_id:
             course_id = course_id.replace(' ', '+')
@@ -738,20 +740,27 @@ class GetBatchEnrollmentDataView(APIView):
 
         if course_id:
             course_key = CourseKey.from_string(course_id)
-            query_filter['course_id'] = course_key
+            enrollment_query_filter['course_id'] = course_key
+            cert_query_filter['course_id'] = course_key
 
         if username:
-            query_filter['user__username'] = username
+            enrollment_query_filter['user__username'] = username
+            cert_query_filter['user__username'] = username
 
         if updated_min:
-            min_date = parser.parse(updated_min)
-            query_filter['created__gt'] = min_date
+            min_date = parser.parse(updated_min).replace(tzinfo=pytz.UTC)
+            enrollment_query_filter['created__gt'] = min_date
+            cert_query_filter['created_date__gt'] = min_date
 
         if updated_max:
-            max_date = parser.parse(updated_max)
-            query_filter['created__lt'] = max_date
+            max_date = parser.parse(updated_max).replace(tzinfo=pytz.UTC)
+            enrollment_query_filter['created__lt'] = max_date
+            cert_query_filter['created_date__lt'] = max_date
 
-        enrollments = CourseEnrollment.objects.filter(**query_filter)
+        user_ids_with_certs = GeneratedCertificate.objects.filter(**cert_query_filter).values('user_id')
+
+        enrollments = CourseEnrollment.objects.filter(
+            Q(user_id__in=user_ids_with_certs) | Q(**enrollment_query_filter))
 
         enrollment_list = []
         for enrollment in enrollments:
@@ -769,7 +778,7 @@ class GetBatchEnrollmentDataView(APIView):
                 enrollment_data['certificate'] = {
                     'completion_date': str(cert.created_date),
                     'grade': cert.grade,
-                    'url': cert.download_url,
+                    'url': "{}/certificates/{}".format(request.HOST, cert.verify_uuid),
                 }
             except GeneratedCertificate.DoesNotExist:
                 pass
