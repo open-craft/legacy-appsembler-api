@@ -779,7 +779,7 @@ class GetBatchEnrollmentDataView(APIView):
                     'completion_date': str(cert.created_date),
                     'grade': cert.grade,
                     'url': "{}/certificates/{}".format(
-                        request._request._current_scheme_host(), cert.verify_uuid
+                        request._request._current_scheme_host, cert.verify_uuid
                     ),
                 }
             except GeneratedCertificate.DoesNotExist:
