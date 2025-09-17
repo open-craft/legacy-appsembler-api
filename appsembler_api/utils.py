@@ -7,10 +7,32 @@ from random import randint
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
+from common.djangoapps.student.models import email_exists_or_retired, username_exists_or_retired
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_authn.views.password_reset import PasswordResetFormNoActive
 
+def account_exists(email, username):
+    # source: https://github.com/appsembler/edx-platform/blob/appsembler/psu-temp-tahoe-juniper/openedx/core/djangoapps/appsembler/api/v1/api.py#L35-L55
+    """Check if an account exists for either the email or the username
+
+    Both email and username are required as parameters, but either or both can
+    be None
+
+    Do we need to check secondary email? If so then check if the email exists:
+    ```
+    from student.models import AccountRecovery
+    AccountRecovery.objects.filter(secondary_email=email).exists()
+    ```
+    """
+    if email and email_exists_or_retired(email):
+        email_exists = True
+    else:
+        email_exists = False
+    if username and username_exists_or_retired(username):
+        username_exists = True
+    else:
+        username_exists = False
+    return email_exists or username_exists
 
 
 def auto_generate_username(email):

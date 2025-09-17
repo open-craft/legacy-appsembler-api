@@ -5,8 +5,8 @@ import random
 import string
 
 import search
-from course_modes.models import CourseMode
-from courseware.courses import get_course_by_id
+from common.djangoapps.course_modes.models import CourseMode
+from openedx.core.lib.courses import get_course_by_id
 from dateutil import parser
 from django.contrib.auth.models import User
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -18,9 +18,8 @@ from edx_rest_framework_extensions.paginators import NamespacedPageNumberPaginat
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.course_api.api import list_courses
 from lms.djangoapps.course_api.serializers import CourseSerializer
-from lms.djangoapps.instructor.views.api import save_registration_code, students_update_enrollment
+from lms.djangoapps.instructor.views.api import students_update_enrollment
 from opaque_keys.edx.keys import CourseKey
-from openedx.core.djangoapps.appsembler.api.v1.api import account_exists
 from openedx.core.djangoapps.enrollments.views import (
     ApiKeyPermissionMixIn,
     EnrollmentCrossDomainSessionAuth,
@@ -36,22 +35,18 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from shoppingcart.exceptions import RedemptionCodeError
-from shoppingcart.models import CourseRegistrationCode, RegistrationCodeRedemption
-from shoppingcart.views import get_reg_code_validity
-from student.models import (
+from common.djangoapps.student.models import (
         AlreadyEnrolledError,
         CourseEnrollment,
         CourseFullError,
         EnrollmentClosedError,
         UserProfile
 )
-from student.views import validate_new_email
-from util.disable_rate_limit import can_disable_rate_limit
-from util.request_rate_limiter import BadRequestRateLimiter
+from common.djangoapps.student.views import validate_new_email
+from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
 from .forms import CourseListGetAndSearchForm
 from .serializers import BulkEnrollmentSerializer
-from .utils import auto_generate_username, send_activation_email
+from .utils import auto_generate_username, send_activation_email, account_exists
 
 
 log = logging.getLogger(__name__)
@@ -408,6 +403,12 @@ class GenerateRegistrationCodesView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
+        # TODO: save_registration_code was removed in https://github.com/openedx/edx-platform/pull/24692/ | https://openedx.atlassian.net/browse/DEPR-43
+        # It's possibly replaced by equivalent things in the ecommerce app https://github.com/openedx-unsupported/ecommerce
+        # Which in turn has also been deprecated and removed in Teak.
+        # Check out https://github.com/hastexo/webhook-receiver or https://github.com/openedx/public-engineering/issues/22#issuecomment-1754239389
+        raise NotImplementedError
+
         course_id = CourseKey.from_string(request.data.get('course_id'))
 
         try:
@@ -448,6 +449,9 @@ class EnrollUserWithEnrollmentCodeView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
+        # TODO: this is also affected by the removal of commerce
+        raise NotImplementedError
+
         enrollment_code = request.data.get('enrollment_code')
         limiter = BadRequestRateLimiter()
         error_reason = ""
@@ -516,6 +520,9 @@ class EnrollmentCodeStatusView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
+        # TODO: this is also affected by the removal of commerce
+        raise NotImplementedError
+
         code = request.data.get('enrollment_code')
         action = request.data.get('action')
         try:
