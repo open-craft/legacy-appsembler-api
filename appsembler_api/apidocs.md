@@ -190,16 +190,16 @@ The endpoint can update email, all available profile fields and also has support
         * `name` # user full name
         * `country` # country iso code, ex: `ES`, `UY`, `US`
         * `gender` # user gender, accepted values `m`, `f` or `o`
-        * `level_of_education` # user education, accepted values `p`, `m`, `b`, `a`, `hs`, `jhs`, `el`, `none` or `other`, 
+        * `level_of_education` # user education, accepted values `p`, `m`, `b`, `a`, `hs`, `jhs`, `el`, `none` or `other`,
         * `year_of_birth` # four digit year as string
         * `city` # text
-        * `mailing_address` # long text 
+        * `mailing_address` # long text
         * `language` # language iso code, ex 'ES', 'EN'
         * `goals` # long text
         * `bio` # text
 
-You also can send extended profile form fiels, but that depends on every installation, you'll need to find the [registration extension form app fork](https://github.com/open-craft/custom-form-app) that is installed on the instance, and check the field names, and accepted values. 
-        
+You also can send extended profile form fiels, but that depends on every installation, you'll need to find the [registration extension form app fork](https://github.com/open-craft/custom-form-app) that is installed on the instance, and check the field names, and accepted values.
+
 * Success Response
 	* Code: 200
 	* Content: Success message and list of updated fields and values
@@ -225,7 +225,7 @@ Authorization: Bearer cbf6a5de322cf6a4323c957a882xy1s321c954b86
 Cache-Control: no-cache
 {
 	"user_lookup": "staff@example.com",
-	"emai": "new_staff@example.com",
+	"email": "new_staff@example.com",
 	"name": "Staff New Name",
 	"country": "US",
 	"gender": "f",
