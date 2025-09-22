@@ -108,7 +108,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst')).read()
 
 setup(
-    name='legacy-appsembler-api',
+    name='shoppingcart',
     version=VERSION,
     description="""Provides otherwise deprecated appsembler_api as a plugin LMS app""",
     long_description=README + '\n\n' + CHANGELOG,
