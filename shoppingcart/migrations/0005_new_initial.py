@@ -8,7 +8,7 @@ import opaque_keys.edx.django.models
 
 class Migration(migrations.Migration):
 
-    initial = True
+    replaces = [('shoppingcart', '0001_initial'), ('shoppingcart', '0002_auto_20151208_1034'), ('shoppingcart', '0003_auto_20151217_0958'), ('shoppingcart', '0004_change_meta_options')]
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ('redeemed_at', models.DateTimeField(auto_now_add=True, null=True)),
                 ('course_enrollment', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='student.courseenrollment')),
                 ('redeemed_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('registration_code', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='appsembler_api.courseregistrationcode')),
+                ('registration_code', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='shoppingcart.courseregistrationcode')),
             ],
         ),
     ]

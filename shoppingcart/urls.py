@@ -6,7 +6,7 @@ from django.db import transaction
 from openedx.core.djangoapps.user_authn.views import login
 from openedx.core.djangoapps.cors_csrf.decorators import ensure_csrf_cookie_cross_domain
 
-from appsembler_api import views
+from shoppingcart import views
 
 urlpatterns = [
     # provide a wrapped cross-domain csrf version of user_api/v1/account/login_session

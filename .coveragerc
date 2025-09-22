@@ -1,7 +1,7 @@
 [run]
 branch = True
 data_file = .coverage
-source=appsembler_api
+source=shoppingcart
 omit =
     test_settings
     *migrations*

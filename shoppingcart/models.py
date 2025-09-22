@@ -15,8 +15,8 @@ class CourseRegistrationCode(models.Model):
 
     .. no_pii:
     """
-    # class Meta(object):
-    #     app_label = "shoppingcart"
+    class Meta(object):
+        app_label = "shoppingcart"
 
     code = models.CharField(max_length=32, db_index=True, unique=True)
     course_id = CourseKeyField(max_length=255, db_index=True)
@@ -36,8 +36,8 @@ class RegistrationCodeRedemption(models.Model):
 
     .. no_pii:
     """
-    # class Meta(object):
-    #     app_label = "shoppingcart"
+    class Meta(object):
+        app_label = "shoppingcart"
 
     order = models.IntegerField(null=True)  # this was originally a foreign key to Order, but we don't use that
     registration_code = models.ForeignKey(CourseRegistrationCode, db_index=True, on_delete=models.CASCADE)

@@ -32,14 +32,14 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.sessions',
-    'appsembler_api',
+    'shoppingcart',
 )
 
 LOCALE_PATHS = [
-    root('appsembler_api', 'conf', 'locale'),
+    root('shoppingcart', 'conf', 'locale'),
 ]
 
-ROOT_URLCONF = 'appsembler_api.urls'
+ROOT_URLCONF = 'shoppingcart.urls'
 
 SECRET_KEY = 'insecure-secret-key'
 

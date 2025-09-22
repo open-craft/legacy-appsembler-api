@@ -3,4 +3,4 @@ include LICENSE.txt
 include README.rst
 include requirements/*.in
 include requirements/*.txt
-recursive-include appsembler_api *.html *.png *.gif *.js *.css *.jpg *.jpeg *.svg *.py
+recursive-include shoppingcart *.html *.png *.gif *.js *.css *.jpg *.jpeg *.svg *.py
