@@ -96,7 +96,7 @@ def is_requirement(line):
     return line and line.strip() and not line.startswith(("-r", "#", "-e", "git+", "-c"))
 
 
-VERSION = get_version('appsembler_api', '__init__.py')
+VERSION = get_version('shoppingcart', '__init__.py')
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
@@ -108,7 +108,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst')).read()
 
 setup(
-    name='legacy-appsembler-api',
+    name='shoppingcart',
     version=VERSION,
     description="""Provides otherwise deprecated appsembler_api as a plugin LMS app""",
     long_description=README + '\n\n' + CHANGELOG,
@@ -116,7 +116,7 @@ setup(
     author_email='john@appsembler.com',
     url='https://github.com/appsembler/legacy-appsembler-api',
     packages=[
-        'appsembler_api',
+        'shoppingcart',
     ],
     include_package_data=True,
     install_requires=load_requirements('requirements/base.in'),
@@ -135,7 +135,7 @@ setup(
     ],
     entry_points={
         'lms.djangoapp': [
-            'appsembler_api = appsembler_api.apps:AppsemblerApiConfig'
+            'shoppingcart = shoppingcart.apps:AppsemblerApiConfig'
         ]
     }
 )

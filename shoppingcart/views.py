@@ -14,6 +14,8 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import Http404
 from django.urls import reverse
+from django_ratelimit.core import is_ratelimited
+from django_ratelimit.exceptions import Ratelimited
 from edx_rest_framework_extensions.paginators import NamespacedPageNumberPagination
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.course_api.api import list_courses
@@ -46,7 +48,9 @@ from common.djangoapps.student.views import validate_new_email
 from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
 from .forms import CourseListGetAndSearchForm
 from .serializers import BulkEnrollmentSerializer
-from .utils import auto_generate_username, send_activation_email, account_exists
+from .utils import auto_generate_username, send_activation_email, account_exists, save_registration_code, get_reg_code_validity, RedemptionCodeError
+from .models import CourseRegistrationCode, RegistrationCodeRedemption
+
 
 
 log = logging.getLogger(__name__)
@@ -403,12 +407,6 @@ class GenerateRegistrationCodesView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        # TODO: save_registration_code was removed in https://github.com/openedx/edx-platform/pull/24692/ | https://openedx.atlassian.net/browse/DEPR-43
-        # It's possibly replaced by equivalent things in the ecommerce app https://github.com/openedx-unsupported/ecommerce
-        # Which in turn has also been deprecated and removed in Teak.
-        # Check out https://github.com/hastexo/webhook-receiver or https://github.com/openedx/public-engineering/issues/22#issuecomment-1754239389
-        raise NotImplementedError
-
         course_id = CourseKey.from_string(request.data.get('course_id'))
 
         try:
@@ -449,11 +447,10 @@ class EnrollUserWithEnrollmentCodeView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        # TODO: this is also affected by the removal of commerce
-        raise NotImplementedError
+        if is_ratelimited(request, key="user", group="enrollment-codes.enroll-user", rate="6/m"):
+            raise Ratelimited()
 
         enrollment_code = request.data.get('enrollment_code')
-        limiter = BadRequestRateLimiter()
         error_reason = ""
         try:
             user = User.objects.get(email=request.data.get('email'))
@@ -465,13 +462,14 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(  # pylint: disable=line-too-long
                 enrollment_code,
                 request,
-                limiter
             )
         except Http404:
+            # only count toward the rate limiting if it was an invalid code
+            is_ratelimited(request, key="user", group="enrollment-codes.enroll-user", rate="6/m", increment=True)
             reg_code_is_valid = False
             reg_code_already_redeemed = False
             error_reason = "Enrollment code not found"
-        if user_is_valid and reg_code_is_valid:
+        if user_is_valid and reg_code_is_valid and not reg_code_already_redeemed:
             course = get_course_by_id(course_registration.course_id, depth=0)
             redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(  # pylint: disable=line-too-long
                 course_registration,
@@ -520,9 +518,6 @@ class EnrollmentCodeStatusView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        # TODO: this is also affected by the removal of commerce
-        raise NotImplementedError
-
         code = request.data.get('enrollment_code')
         action = request.data.get('action')
         try:
