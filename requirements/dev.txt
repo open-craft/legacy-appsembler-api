@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-asgiref==3.9.1
+asgiref==3.9.2
     # via
     #   -r requirements/quality.txt
     #   django
@@ -62,7 +62,7 @@ cryptography==46.0.1
     # via
     #   -r requirements/quality.txt
     #   secretstorage
-diff-cover==9.6.0
+diff-cover==9.7.0
     # via -r requirements/dev.in
 dill==0.4.0
     # via
@@ -86,6 +86,12 @@ edx-i18n-tools==1.9.0
     # via -r requirements/dev.in
 edx-lint==5.6.0
     # via -r requirements/quality.txt
+factory-boy==3.3.3
+    # via -r requirements/quality.txt
+faker==37.8.0
+    # via
+    #   -r requirements/quality.txt
+    #   factory-boy
 filelock==3.19.1
     # via
     #   tox
@@ -324,6 +330,10 @@ tox-battery==0.6.2
     # via -r requirements/dev.in
 twine==6.2.0
     # via -r requirements/quality.txt
+tzdata==2025.2
+    # via
+    #   -r requirements/quality.txt
+    #   faker
 urllib3==2.5.0
     # via
     #   -r requirements/quality.txt

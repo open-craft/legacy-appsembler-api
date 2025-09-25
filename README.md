@@ -17,9 +17,39 @@ Updated for standalone, Juniper/Py3 by @bryanlandia
 
 See [apidocs.md](./appsembler_api/apidocs.md) for details on usage/the API
 
+## Installing in a devstack
+
+This assumes a [Tutor dev devstack](https://docs.tutor.edly.io/dev.html) set up.
+
+```
+git clone https://github.com/open-craft/legacy-appsembler-api
+tutor mounts add ./legacy-appsembler-api
+
+# This directory won't be autodetected for build-time mount by Tutor,
+# so we need to manually configure Tutor for it.
+mkdir -p "$TUTOR_PLUGINS_ROOT"
+echo 'from tutor import hooks; hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "legacy-appsembler-api"))' > "$TUTOR_PLUGINS_ROOT/legacy-appsembler-api.py"
+tutor plugins enable legacy-appsembler-api
+
+tutor images build openedx-dev
+tutor dev launch
+```
+
 ## Testing
 
-For some tests you need to run them from within a working Open edX environment.
+Quality tests (runs within tox, so you can run it directly on your workstation):
+
+```
+make quality
+```
+
+---
+
+For unit/integration tests and migration tests,
+you need to run them from within a working Open edX environment.
+Note that the tests will make changes to the database. They should be automatically rolled back,
+but just in case, it's only recommended to run on a test deployment.
+
 Install in a Tutor devstack, then shell into the lms:
 
 ```sh
@@ -32,9 +62,9 @@ In the LMS shell, cd to the plugin directory:
 cd /mnt/legacy-appsembler-api
 ```
 
-Then you can run the unit tests (no unit tests yet):
+Then you can run the unit tests and migration tests:
 
 ```sh
-pytest
-python ./manage.py makemigrations shoppingcart --check --dry-run --verbosity 3
+make test
+make test_migrations
 ```
