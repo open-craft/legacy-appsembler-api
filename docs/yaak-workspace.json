@@ -1,0 +1,739 @@
+{
+  "yaakVersion": "0.0.0",
+  "yaakSchema": 4,
+  "timestamp": "2025-09-29T06:35:37.894018172",
+  "resources": {
+    "workspaces": [
+      {
+        "model": "workspace",
+        "id": "wk_APy3xzDHqt",
+        "createdAt": "2025-09-08T02:29:52.878532497",
+        "updatedAt": "2025-09-17T00:32:25.993042473",
+        "authentication": {},
+        "authenticationType": null,
+        "description": "",
+        "headers": [],
+        "name": "Open edX",
+        "encryptionKeyChallenge": null,
+        "settingValidateCertificates": true,
+        "settingFollowRedirects": true,
+        "settingRequestTimeout": 0
+      }
+    ],
+    "environments": [
+      {
+        "model": "environment",
+        "id": "ev_AY45iYsRut",
+        "workspaceId": "wk_APy3xzDHqt",
+        "createdAt": "2025-09-08T02:29:54.905785784",
+        "updatedAt": "2025-09-17T00:39:25.907154243",
+        "name": "Global Variables",
+        "public": false,
+        "base": true,
+        "variables": [
+          {
+            "enabled": true,
+            "name": "CLIENT_ID",
+            "value": "api-testing-key",
+            "id": "N46MgQreR5"
+          },
+          {
+            "enabled": true,
+            "name": "CLIENT_SECRET",
+            "value": "api-testing-secret",
+            "id": "376ESvnEjQ"
+          },
+          {
+            "enabled": true,
+            "name": "LMS",
+            "value": "http://local.openedx.io:8000",
+            "id": "cRUiMGJEFn"
+          },
+          {
+            "enabled": true,
+            "name": "STUDIO",
+            "value": "http://studio.local.openedx.io:8001",
+            "id": "pphdqhruDm"
+          }
+        ],
+        "color": null
+      }
+    ],
+    "folders": [
+      {
+        "model": "folder",
+        "id": "fl_Ry6DjUQEqZ",
+        "createdAt": "2025-09-17T00:36:36.228936194",
+        "updatedAt": "2025-09-17T02:26:41.937860825",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": null,
+        "authentication": {
+          "token": "${[ response.body.path(request='rq_iep7QXuiyh', path=b64'JC5hY2Nlc3NfdG9rZW4', behavior='always') ]}"
+        },
+        "authenticationType": "bearer",
+        "description": "",
+        "headers": [],
+        "name": "legacy-appsembler-api",
+        "sortPriority": 1000.0
+      },
+      {
+        "model": "folder",
+        "id": "fl_TmgykaqU4a",
+        "createdAt": "2025-09-08T02:33:11.740254732",
+        "updatedAt": "2025-09-17T00:43:26.786439583",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": null,
+        "authentication": {},
+        "authenticationType": null,
+        "description": "Auth views - you will need a valid client_id and client_secret - see https://docs.openedx.org/projects/edx-platform/en/latest/how-tos/use_the_api.html",
+        "headers": [],
+        "name": "Auth",
+        "sortPriority": 0.0
+      }
+    ],
+    "httpRequests": [
+      {
+        "model": "http_request",
+        "id": "rq_5wMTMNAWhP",
+        "createdAt": "2025-09-19T06:29:08.064721192",
+        "updatedAt": "2025-09-22T03:45:35.553346245",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"action\": \"restore\",\n    \"enrollment_code\": \"2q0zb35r\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": false,
+            "name": "x-CSRFToken",
+            "value": "${[ response.body.path(request='rq_WrGRLPnEmq', path=b64'JC5jc3JmVG9rZW4', behavior='always') ]}",
+            "id": "2G4vBr8seA"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "5bjegf4Xd0"
+          }
+        ],
+        "method": "POST",
+        "name": "enrollment-codes/status",
+        "sortPriority": 11000.001,
+        "url": "${[ LMS ]}/appsembler_api/v0/enrollment-codes/status",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_Sb6ppk5vdH",
+        "createdAt": "2025-09-19T06:04:20.735338763",
+        "updatedAt": "2025-09-22T03:45:27.010848821",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"email\": \"apicreated2@example.com\",\n    \"enrollment_code\": \"2q0zb35r\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": false,
+            "name": "x-CSRFToken",
+            "value": "${[ response.body.path(request='rq_WrGRLPnEmq', path=b64'JC5jc3JmVG9rZW4', behavior='always') ]}",
+            "id": "2G4vBr8seA"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "5bjegf4Xd0"
+          }
+        ],
+        "method": "POST",
+        "name": "enrollment-codes/enroll-user",
+        "sortPriority": 11000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/enrollment-codes/enroll-user",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_Z8T2cqxK8C",
+        "createdAt": "2025-09-19T05:54:05.733450592",
+        "updatedAt": "2025-09-19T07:00:59.322514964",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"total_registration_codes\": \"3\",\n    \"course_id\": \"course-v1:OpenedX+DemoX+DemoCourse\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": false,
+            "name": "x-CSRFToken",
+            "value": "${[ response.body.path(request='rq_WrGRLPnEmq', path=b64'JC5jc3JmVG9rZW4', behavior='always') ]}",
+            "id": "2G4vBr8seA"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "TABRa20ev8"
+          }
+        ],
+        "method": "POST",
+        "name": "enrollment-codes/generate",
+        "sortPriority": 10000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/enrollment-codes/generate",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_X4KWPccTd8",
+        "createdAt": "2025-09-19T05:07:43.908000793",
+        "updatedAt": "2025-09-22T03:46:31.581356770",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": ""
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "GET",
+        "name": "analytics/enrollment/batch",
+        "sortPriority": 9000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/analytics/enrollment/batch",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": "updated_max",
+            "value": "2025-09-23",
+            "id": "eCFjIjVR4C"
+          },
+          {
+            "enabled": true,
+            "name": "updated_min",
+            "value": "2025-09-01",
+            "id": "CB8Hz9YMIt"
+          },
+          {
+            "enabled": false,
+            "name": "username",
+            "value": "samuel",
+            "id": "pEKBTHX9kj"
+          },
+          {
+            "enabled": true,
+            "name": "course_id",
+            "value": "course-v1:OpenedX+DemoX+DemoCourse",
+            "id": "c9FFSMNdTF"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "2uk0nKRpZz"
+          }
+        ]
+      },
+      {
+        "model": "http_request",
+        "id": "rq_YfHzvBHz5Z",
+        "createdAt": "2025-09-19T05:04:10.824706583",
+        "updatedAt": "2025-09-22T03:45:55.111010142",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": ""
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "GET",
+        "name": "analytics/accounts/batch",
+        "sortPriority": 8000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/analytics/accounts/batch",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": "updated_max",
+            "value": "2025-09-23",
+            "id": "eCFjIjVR4C"
+          },
+          {
+            "enabled": true,
+            "name": "updated_min",
+            "value": "2025-09-01",
+            "id": "CB8Hz9YMIt"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "bxtU4NmFfc"
+          }
+        ]
+      },
+      {
+        "model": "http_request",
+        "id": "rq_92u3uoRksM",
+        "createdAt": "2025-09-19T04:54:46.980951012",
+        "updatedAt": "2025-09-19T06:05:41.924590927",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": ""
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "GET",
+        "name": "search_courses",
+        "sortPriority": 7000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/search_courses",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": "search_term",
+            "value": "demo",
+            "id": "6YEfqkfiex"
+          },
+          {
+            "enabled": true,
+            "name": "org",
+            "value": "openedx",
+            "id": "8ReJTVkUin"
+          },
+          {
+            "enabled": true,
+            "name": "filter_",
+            "value": "foo=yes",
+            "id": "RsqNu8qPr3"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "U0Tq7GTVy2"
+          }
+        ]
+      },
+      {
+        "model": "http_request",
+        "id": "rq_JfyE4VB7rh",
+        "createdAt": "2025-09-19T04:47:35.118800954",
+        "updatedAt": "2025-09-19T06:05:41.780598678",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"email\": \"testuser11157161811@example.com\",\n    \"name\": \"Name 1\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "POST",
+        "name": "accounts/user_without_password",
+        "sortPriority": 2000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/accounts/user_without_password",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_TwtQEarWBA",
+        "createdAt": "2025-09-17T06:18:33.093744862",
+        "updatedAt": "2025-09-19T06:05:41.718975790",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": "none",
+        "body": {
+          "form": [
+            {
+              "enabled": true,
+              "id": "uG6FbaGx8t",
+              "name": "email",
+              "value": "apicreated2@example.com"
+            },
+            {
+              "enabled": true,
+              "id": "hcxpRvYc64",
+              "name": "password",
+              "value": "mypassword"
+            },
+            {
+              "enabled": true,
+              "id": "aSdiTsGIE3",
+              "name": "",
+              "value": ""
+            }
+          ]
+        },
+        "bodyType": "multipart/form-data",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "x-CSRFToken",
+            "value": "${[ response.body.path(request='rq_WrGRLPnEmq', path=b64'JC5jc3JmVG9rZW4', behavior='always') ]}",
+            "id": "RA4ymWWJWS"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "mzgkqdCaDu"
+          },
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "multipart/form-data",
+            "id": "0YfTYCAWkT"
+          }
+        ],
+        "method": "POST",
+        "name": "account/login_session",
+        "sortPriority": 0.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/account/login_session/",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_exDSx2qZ4L",
+        "createdAt": "2025-09-17T02:43:25.304427839",
+        "updatedAt": "2025-09-19T06:05:41.871658542",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"user_lookup\": \"apicreated1\",\n    \"email\": \"apicreated1@example.com\",\n    \"name\": \"my new name\",\n    \"year_of_birth\": \"2001\",\n    \"bio\": \"just another user\",\n    \"country\": \"AU\",\n    \"level_of_education\": \"a\",\n    \"gender\": \"m\",\n    \"language\": \"EN\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "POST",
+        "name": "accounts/update_user",
+        "sortPriority": 5000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/accounts/update_user",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_HkUu5eTgTt",
+        "createdAt": "2025-09-17T02:37:10.339763102",
+        "updatedAt": "2025-09-19T06:05:41.819270050",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"username\": \"apicreated1\",\n    \"password\": \"newpassword\",\n    \"email\": \"apicreated1@example.com\",\n    \"name\": \"my new name\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "POST",
+        "name": "accounts/connect",
+        "sortPriority": 3000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/accounts/connect",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_UMrw3Z9wVC",
+        "createdAt": "2025-09-17T02:31:08.676850320",
+        "updatedAt": "2025-09-19T06:05:41.897848344",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"action\": \"enroll\",\n    \"auto_enroll\": true,\n    \"identifiers\": \"apicreated1@example.com,apicreated2@example.com\",\n    \"email_students\": true,\n    \"courses\": \"course-v1:OpenedX+DemoX+DemoCourse\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "POST",
+        "name": "bulk-enrollment/bulk-enroll",
+        "sortPriority": 6000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/bulk-enrollment/bulk-enroll",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_reDAowFSrk",
+        "createdAt": "2025-09-17T02:25:54.113660987",
+        "updatedAt": "2025-09-23T06:26:48.284800449",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": ""
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "GET",
+        "name": "accounts/get-user",
+        "sortPriority": 4000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/accounts/get-user/apicreated3",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_JHb8U6LVsM",
+        "createdAt": "2025-09-17T00:37:49.096406570",
+        "updatedAt": "2025-09-26T06:01:24.148454640",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_Ry6DjUQEqZ",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {
+          "text": "{\n    \"username\": \"apicreated4\",\n    \"password\": \"mypassword\",\n    \"email\": \"apicreated4@example.com\",\n    \"name\": \"my name\",\n    \"send_activation_email\": \"False\"\n}"
+        },
+        "bodyType": "application/json",
+        "description": "",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "application/json",
+            "id": "VI2e5F69aI"
+          },
+          {
+            "enabled": true,
+            "name": "",
+            "value": "",
+            "id": "nKhzb2UWXK"
+          }
+        ],
+        "method": "POST",
+        "name": "accounts/create",
+        "sortPriority": 1000.0,
+        "url": "${[ LMS ]}/appsembler_api/v0/accounts/create",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_iep7QXuiyh",
+        "createdAt": "2025-09-11T00:38:29.639923184",
+        "updatedAt": "2025-09-29T06:34:50.640564494",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_TmgykaqU4a",
+        "authentication": {},
+        "authenticationType": "none",
+        "body": {
+          "form": [
+            {
+              "enabled": true,
+              "id": "HZqsUyY2Gh",
+              "name": "client_id",
+              "value": "${[ CLIENT_ID ]}"
+            },
+            {
+              "enabled": true,
+              "id": "aj8JzB3HGu",
+              "name": "client_secret",
+              "value": "${[ CLIENT_SECRET ]}"
+            },
+            {
+              "enabled": true,
+              "id": "IY8Mfzr9FZ",
+              "name": "token_type",
+              "value": "bearer"
+            },
+            {
+              "enabled": true,
+              "id": "kT28Pe6cFR",
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "enabled": true,
+              "id": "y28PNcX24D",
+              "name": "",
+              "value": ""
+            }
+          ]
+        },
+        "bodyType": "multipart/form-data",
+        "description": "requires oauth2 provider set up from http://local.openedx.io:8000/admin/oauth2_provider/application/\n\nSee also https://discuss.openedx.org/t/authenticate-with-oauth-token-to-access-api-endpoints-instructor-apis/13658 for help",
+        "headers": [
+          {
+            "enabled": true,
+            "name": "Content-Type",
+            "value": "multipart/form-data",
+            "id": "vcnE3JtGnA"
+          }
+        ],
+        "method": "POST",
+        "name": "Bearer token",
+        "sortPriority": 0.0,
+        "url": "${[ LMS ]}/oauth2/access_token",
+        "urlParameters": []
+      },
+      {
+        "model": "http_request",
+        "id": "rq_WrGRLPnEmq",
+        "createdAt": "2025-09-08T02:40:27.811491757",
+        "updatedAt": "2025-09-17T00:44:39.128316928",
+        "workspaceId": "wk_APy3xzDHqt",
+        "folderId": "fl_TmgykaqU4a",
+        "authentication": {},
+        "authenticationType": "none",
+        "body": {
+          "form": []
+        },
+        "bodyType": null,
+        "description": "",
+        "headers": [],
+        "method": "GET",
+        "name": "CSRF token",
+        "sortPriority": 2000.0,
+        "url": "${[ LMS ]}/csrf/api/v1/token",
+        "urlParameters": []
+      }
+    ],
+    "grpcRequests": [],
+    "websocketRequests": []
+  }
+}
