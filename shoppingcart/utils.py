@@ -4,6 +4,7 @@ utility functions for API classes.
 
 import logging
 import random
+import secrets
 import string
 
 from common.djangoapps.student.models import (
@@ -106,7 +107,7 @@ def generate_random_string(length):
     chars = [
         char for char in string.ascii_uppercase + string.digits + string.ascii_lowercase if char not in "aAeEiIoOuU1l"
     ]
-    return "".join((random.choice(chars) for i in range(length)))
+    return "".join((secrets.choice(chars) for i in range(length)))
 
 
 def random_code_generator():

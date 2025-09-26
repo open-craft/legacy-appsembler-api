@@ -2,7 +2,7 @@
 
 import json
 import logging
-import random
+import secrets
 import string
 
 import pytz
@@ -159,7 +159,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
         try:
             username = auto_generate_username(email)
             password = "".join(
-                random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32)
+                secrets.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32)
             )
 
             data["username"] = username
