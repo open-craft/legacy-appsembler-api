@@ -16,3 +16,25 @@ Primary authors were @johnbaldwin, @melvinsoft
 Updated for standalone, Juniper/Py3 by @bryanlandia
 
 See [apidocs.md](./appsembler_api/apidocs.md) for details on usage/the API
+
+## Testing
+
+For some tests you need to run them from within a working Open edX environment.
+Install in a Tutor devstack, then shell into the lms:
+
+```sh
+tutor dev exec lms -- bash
+```
+
+In the LMS shell, cd to the plugin directory:
+
+```sh
+cd /mnt/legacy-appsembler-api
+```
+
+Then you can run the unit tests (no unit tests yet):
+
+```sh
+pytest
+python ./manage.py makemigrations shoppingcart --check --dry-run --verbosity 3
+```

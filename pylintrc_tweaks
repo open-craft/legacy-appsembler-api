@@ -1,0 +1,10 @@
+
+[MESSAGES CONTROL]
+disable =
+    import-error,
+    missing-class-docstring,
+    missing-function-docstring,
+    consider-using-f-string,
+    too-few-public-methods,
+    django-not-configured,
+    raise-missing-from,

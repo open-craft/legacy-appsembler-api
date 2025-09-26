@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+
+      - name: Install tox
+        run: |
+          pip install "tox<5"
+
+      - name: Run quality tests
+        run: make quality
