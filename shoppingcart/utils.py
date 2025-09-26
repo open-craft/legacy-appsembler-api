@@ -80,7 +80,7 @@ def send_activation_email(request):
     return False
 
 
-def get_reg_code_validity(registration_code, request):
+def get_reg_code_validity(registration_code):
     """
     This function checks if the registration code is valid, and then checks if it was already redeemed.
     """

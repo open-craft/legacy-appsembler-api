@@ -127,6 +127,7 @@ class CreateUserAccountView(APIView):
             errors = {"user_message": "Wrong parameters on user creation"}
             return Response(errors, status=400)
 
+        # NOTE: there is a trailing space in the key in data; preserving in case clients rely on this behaviour.
         response = Response({"user_id ": user_id}, status=200)
         return response
 
@@ -467,10 +468,7 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             user_is_valid = False
             error_reason = "User not found"
         try:
-            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(
-                enrollment_code,
-                request,
-            )
+            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(enrollment_code)
         except Http404:
             # only count toward the rate limiting if it was an invalid code
             is_ratelimited(request, key="user", group="enrollment-codes.enroll-user", rate="6/m", increment=True)
