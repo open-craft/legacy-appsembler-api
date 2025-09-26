@@ -3,9 +3,11 @@ Database models for appsembler_api.
 """
 
 from common.djangoapps.student.models import CourseEnrollment
-from django.contrib.auth.models import User
+from django.contrib import auth
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
+
+User = auth.get_user_model()
 
 
 class CourseRegistrationCode(models.Model):
@@ -16,7 +18,7 @@ class CourseRegistrationCode(models.Model):
     .. no_pii:
     """
 
-    class Meta(object):
+    class Meta:
         app_label = "shoppingcart"
 
     code = models.CharField(max_length=32, db_index=True, unique=True)
@@ -40,7 +42,7 @@ class RegistrationCodeRedemption(models.Model):
     .. no_pii:
     """
 
-    class Meta(object):
+    class Meta:
         app_label = "shoppingcart"
 
     order = models.IntegerField(null=True)  # this was originally a foreign key to Order, but we don't use that

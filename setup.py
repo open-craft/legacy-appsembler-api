@@ -18,7 +18,8 @@ def get_version(*file_paths):
                    version string
     """
     filename = os.path.join(os.path.dirname(__file__), *file_paths)
-    version_file = open(filename).read()
+    with open(filename, encoding="utf-8") as version_file_handle:
+        version_file = version_file_handle.read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
         return version_match.group(1)
@@ -64,7 +65,7 @@ def load_requirements(*requirements_paths):
     # read requirements from .in
     # store the path to any constraint files that are pulled in
     for path in requirements_paths:
-        with open(path) as reqs:
+        with open(path, encoding="utf-8") as reqs:
             for line in reqs:
                 if is_requirement(line):
                     add_version_constraint_or_raise(line, requirements, True)
@@ -73,7 +74,7 @@ def load_requirements(*requirements_paths):
 
     # process constraint files: add constraints to existing requirements
     for constraint_file in constraint_files:
-        with open(constraint_file) as reader:
+        with open(constraint_file, encoding="utf-8") as reader:
             for line in reader:
                 if is_requirement(line):
                     add_version_constraint_or_raise(line, requirements, False)
@@ -82,6 +83,7 @@ def load_requirements(*requirements_paths):
     constrained_requirements = [
         "{pkg}{version}".format(pkg=pkg, version=version or "") for (pkg, version) in sorted(requirements.items())
     ]
+    return constrained_requirements
 
 
 def is_requirement(line):
@@ -103,8 +105,10 @@ if sys.argv[-1] == "tag":
     os.system("git push --tags")
     sys.exit()
 
-README = open(os.path.join(os.path.dirname(__file__), "README.md")).read()
-CHANGELOG = open(os.path.join(os.path.dirname(__file__), "CHANGELOG.rst")).read()
+with open(os.path.join(os.path.dirname(__file__), "README.md"), encoding="utf-8") as f:
+    README = f.read()
+with open(os.path.join(os.path.dirname(__file__), "CHANGELOG.rst"), encoding="utf-8") as f:
+    CHANGELOG = f.read()
 
 setup(
     name="shoppingcart",

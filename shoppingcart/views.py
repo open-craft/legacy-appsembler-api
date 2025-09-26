@@ -1,3 +1,5 @@
+"""Views for the API"""
+
 import json
 import logging
 import random
@@ -16,7 +18,7 @@ from common.djangoapps.student.models import (
 from common.djangoapps.student.views import validate_new_email
 from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
 from dateutil import parser
-from django.contrib.auth.models import User
+from django.contrib import auth
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
@@ -62,6 +64,8 @@ from .utils import (
     save_registration_code,
     send_activation_email,
 )
+
+User = auth.get_user_model()
 
 log = logging.getLogger(__name__)
 
@@ -132,7 +136,11 @@ class CreateUserAccountWithoutPasswordView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        """ """
+        """
+        Create user account without a password.
+
+        NOTE: this is possibly no longer used
+        """
         data = request.data
 
         # set the honor_code and honor_code like checked,
@@ -170,7 +178,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
             # Only return first error for each field
             errors = {"user_message": "Wrong parameters on user creation"}
             return Response(errors, status=400)
-        except ValueError as err:
+        except ValueError:
             errors = {"user_message": "Wrong email format"}
             return Response(errors, status=400)
 
@@ -306,8 +314,8 @@ class UpdateUserAccount(APIView):
         if "email" in data and data["email"] != user.email:
             try:
                 validate_new_email(user, data["email"])
-            except ValueError as e:
-                return Response({"integrity_error": e.message}, status=400)
+            except ValueError as err:
+                return Response({"integrity_error": str(err)}, status=400)
 
             user.email = data["email"]
             user.save()
@@ -393,7 +401,7 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
     def post(self, request):
         serializer = BulkEnrollmentSerializer(data=request.data)
         if serializer.is_valid():
-            request._request.POST = request.data
+            request._request.POST = request.data  # pylint: disable=protected-access
             response_dict = {
                 "auto_enroll": serializer.data.get("auto_enroll"),
                 "email_students": serializer.data.get("email_students"),
@@ -401,11 +409,13 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
                 "courses": {},
             }
             for course in serializer.data.get("courses"):
-                response = students_update_enrollment(request._request, course_id=course)
+                response = students_update_enrollment(
+                    request._request,  # pylint: disable=protected-access
+                    course_id=course,
+                )
                 response_dict["courses"][course] = json.loads(response.content.decode("utf-8"))
             return Response(data=response_dict, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GenerateRegistrationCodesView(APIView):
@@ -428,7 +438,6 @@ class GenerateRegistrationCodesView(APIView):
                 request.user,
                 course_id,
                 course_mode,
-                order=None,
             )
             registration_codes.append(generated_registration_code.code)
 
@@ -458,11 +467,9 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             user_is_valid = False
             error_reason = "User not found"
         try:
-            reg_code_is_valid, reg_code_already_redeemed, course_registration = (
-                get_reg_code_validity(  # pylint: disable=line-too-long
-                    enrollment_code,
-                    request,
-                )
+            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(
+                enrollment_code,
+                request,
             )
         except Http404:
             # only count toward the rate limiting if it was an invalid code
@@ -472,7 +479,7 @@ class EnrollUserWithEnrollmentCodeView(APIView):
             error_reason = "Enrollment code not found"
         if user_is_valid and reg_code_is_valid and not reg_code_already_redeemed:
             course = get_course_by_id(course_registration.course_id, depth=0)
-            redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(  # pylint: disable=line-too-long
+            redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(
                 course_registration, user
             )
             try:
@@ -704,7 +711,7 @@ class GetBatchEnrollmentDataView(APIView):
     authentication_classes = (BearerAuthenticationAllowInactiveUser,)
     permission_classes = (IsStaffOrOwner,)
 
-    def get(self, request):
+    def get(self, request):  # pylint: disable=too-many-locals
         """
         /appsembler_api/v0/analytics/accounts/batch[?course_id=course_slug&time-parameter]
 
@@ -768,7 +775,10 @@ class GetBatchEnrollmentDataView(APIView):
                 enrollment_data["certificate"] = {
                     "completion_date": str(cert.created_date),
                     "grade": cert.grade,
-                    "url": "{}/certificates/{}".format(request._request._current_scheme_host, cert.verify_uuid),
+                    "url": "{}/certificates/{}".format(
+                        request._request._current_scheme_host,  # pylint: disable=protected-access
+                        cert.verify_uuid,
+                    ),
                 }
             except GeneratedCertificate.DoesNotExist:
                 pass

@@ -12,7 +12,7 @@ class StringListField(serializers.ListField):
         return data.split(",")
 
 
-class BulkEnrollmentSerializer(serializers.Serializer):
+class BulkEnrollmentSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     """Serializes enrollment information for a collection of students/emails.
     This is mainly useful for implementing validation when performing bulk enrollment operations.
     """

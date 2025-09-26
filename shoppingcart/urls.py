@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long,
+"""API endpoint urls for the plugin"""
 
 from django.db import transaction
 from django.urls import re_path
@@ -43,12 +43,12 @@ urlpatterns = [
         r"^enrollment-codes/generate",
         views.GenerateRegistrationCodesView.as_view(),
         name="generate_registration_codes_api",
-    ),  # pylint: disable=line-too-long
+    ),
     re_path(
         r"^enrollment-codes/enroll-user",
         views.EnrollUserWithEnrollmentCodeView.as_view(),
         name="enroll_use_with_code_api",
-    ),  # pylint: disable=line-too-long
+    ),
     re_path(r"^enrollment-codes/status", views.EnrollmentCodeStatusView.as_view(), name="enrollment_code_status_api"),
     # enrollment analytics API
     re_path(r"^analytics/accounts/batch", views.GetBatchUserDataView.as_view(), name="get_batch_user_data"),
