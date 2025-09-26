@@ -1,12 +1,20 @@
 import json
 import logging
-import pytz
 import random
 import string
 
+import pytz
 import search
 from common.djangoapps.course_modes.models import CourseMode
-from openedx.core.lib.courses import get_course_by_id
+from common.djangoapps.student.models import (
+    AlreadyEnrolledError,
+    CourseEnrollment,
+    CourseFullError,
+    EnrollmentClosedError,
+    UserProfile,
+)
+from common.djangoapps.student.views import validate_new_email
+from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
 from dateutil import parser
 from django.contrib.auth.models import User
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -28,30 +36,32 @@ from openedx.core.djangoapps.enrollments.views import (
     EnrollmentUserThrottle,
 )
 from openedx.core.djangoapps.user_authn.views.register import create_account_with_params
-from openedx.core.djangoapps.user_authn.views.registration_form import \
-    get_registration_extension_form
+from openedx.core.djangoapps.user_authn.views.registration_form import (
+    get_registration_extension_form,
+)
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
-from openedx.core.lib.api.permissions import ApiKeyHeaderPermissionIsAuthenticated, IsStaffOrOwner
+from openedx.core.lib.api.permissions import (
+    ApiKeyHeaderPermissionIsAuthenticated,
+    IsStaffOrOwner,
+)
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
+from openedx.core.lib.courses import get_course_by_id
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from common.djangoapps.student.models import (
-        AlreadyEnrolledError,
-        CourseEnrollment,
-        CourseFullError,
-        EnrollmentClosedError,
-        UserProfile
-)
-from common.djangoapps.student.views import validate_new_email
-from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
+
 from .forms import CourseListGetAndSearchForm
-from .serializers import BulkEnrollmentSerializer
-from .utils import auto_generate_username, send_activation_email, account_exists, save_registration_code, get_reg_code_validity, RedemptionCodeError
 from .models import CourseRegistrationCode, RegistrationCodeRedemption
-
-
+from .serializers import BulkEnrollmentSerializer
+from .utils import (
+    RedemptionCodeError,
+    account_exists,
+    auto_generate_username,
+    get_reg_code_validity,
+    save_registration_code,
+    send_activation_email,
+)
 
 log = logging.getLogger(__name__)
 
@@ -83,16 +93,16 @@ class CreateUserAccountView(APIView):
 
         # set the honor_code and honor_code like checked,
         # so we can use the already defined methods for creating an user
-        data['honor_code'] = "True"
-        data['terms_of_service'] = "True"
+        data["honor_code"] = "True"
+        data["terms_of_service"] = "True"
 
-        if 'send_activation_email' in data and data['send_activation_email'] == "False":
-            data['send_activation_email'] = False
+        if "send_activation_email" in data and data["send_activation_email"] == "False":
+            data["send_activation_email"] = False
         else:
-            data['send_activation_email'] = True
+            data["send_activation_email"] = True
 
-        email = request.data.get('email')
-        username = request.data.get('username')
+        email = request.data.get("email")
+        username = request.data.get("username")
 
         # Handle duplicate email/username
         conflicts = account_exists(email=email, username=username)
@@ -113,7 +123,7 @@ class CreateUserAccountView(APIView):
             errors = {"user_message": "Wrong parameters on user creation"}
             return Response(errors, status=400)
 
-        response = Response({'user_id ': user_id}, status=200)
+        response = Response({"user_id ": user_id}, status=200)
         return response
 
 
@@ -122,17 +132,15 @@ class CreateUserAccountWithoutPasswordView(APIView):
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        """
-
-        """
+        """ """
         data = request.data
 
         # set the honor_code and honor_code like checked,
         # so we can use the already defined methods for creating an user
-        data['honor_code'] = "True"
-        data['terms_of_service'] = "True"
+        data["honor_code"] = "True"
+        data["terms_of_service"] = "True"
 
-        email = request.data.get('email')
+        email = request.data.get("email")
 
         # Handle duplicate email/username
         conflicts = account_exists(email=email, username=None)
@@ -142,14 +150,13 @@ class CreateUserAccountWithoutPasswordView(APIView):
 
         try:
             username = auto_generate_username(email)
-            password = ''.join(
-                random.choice(
-                    string.ascii_uppercase + string.ascii_lowercase + string.digits)
-                for _ in range(32))
+            password = "".join(
+                random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32)
+            )
 
-            data['username'] = username
-            data['password'] = password
-            data['send_activation_email'] = False
+            data["username"] = username
+            data["password"] = password
+            data["send_activation_email"] = False
 
             user = create_account_with_params(request, data)
             # set the user as inactive
@@ -167,7 +174,7 @@ class CreateUserAccountWithoutPasswordView(APIView):
             errors = {"user_message": "Wrong email format"}
             return Response(errors, status=400)
 
-        response = Response({'user_id': user_id, 'username': username}, status=200)
+        response = Response({"user_id": user_id, "username": username}, status=200)
         return response
 
 
@@ -198,10 +205,10 @@ class UserAccountConnect(APIView):
         """
         data = request.data
 
-        username = data.get('username', '')
-        new_email = data.get('email', '')
-        new_password = data.get('password', '')
-        new_name = data.get('name', '')
+        username = data.get("username", "")
+        new_email = data.get("email", "")
+        new_password = data.get("password", "")
+        new_name = data.get("name", "")
 
         try:
             user = User.objects.get(username=username)
@@ -214,8 +221,7 @@ class UserAccountConnect(APIView):
                     validate_email(new_email)
 
                     if account_exists(email=new_email, username=None):
-                        errors = {
-                            "user_message": "The email %s is in use by another user" % (new_email)}
+                        errors = {"user_message": "The email %s is in use by another user" % (new_email)}
                         return Response(errors, status=409)
 
                     user.email = new_email
@@ -230,19 +236,17 @@ class UserAccountConnect(APIView):
             user.save()
 
         except User.DoesNotExist:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response(status=status.HTTP_404_NOT_FOUND)
         except ValidationError:
             errors = {"user_message": "Wrong parameters on user connection"}
             return Response(errors, status=400)
 
-        response = Response({'user_id': user.id}, status=200)
+        response = Response({"user_id": user.id}, status=200)
         return response
 
 
 class UpdateUserAccount(APIView):
-    """ HTTP endpoint for updating and user account """
+    """HTTP endpoint for updating and user account"""
 
     authentication_classes = (BearerAuthenticationAllowInactiveUser,)
     permission_classes = (IsStaffOrOwner,)
@@ -275,40 +279,52 @@ class UpdateUserAccount(APIView):
         """
         data = request.data
 
-        if not str(data.get('user_lookup', '')).strip():
+        if not str(data.get("user_lookup", "")).strip():
             errors = {"lookup_error": "No user lookup has been provided"}
             return Response(errors, status=400)
 
         try:
-            user = User.objects.get(
-                Q(username=data['user_lookup']) | Q(email=data['user_lookup'])
-            )
+            user = User.objects.get(Q(username=data["user_lookup"]) | Q(email=data["user_lookup"]))
         except User.DoesNotExist:
-            return Response({
-                "user_not_found": "The user for the Given username or email doesn't exists",
-            }, status=404)
+            return Response(
+                {
+                    "user_not_found": "The user for the Given username or email doesn't exists",
+                },
+                status=404,
+            )
         except User.MultipleObjectsReturned:
-            return Response({
-                "lookup_error": "Two users have been found with the provided user_lookup",
-            }, status=400)
+            return Response(
+                {
+                    "lookup_error": "Two users have been found with the provided user_lookup",
+                },
+                status=400,
+            )
 
         updated_fields = {}
 
         # update email
-        if 'email' in data and data['email'] != user.email:
+        if "email" in data and data["email"] != user.email:
             try:
-                validate_new_email(user, data['email'])
+                validate_new_email(user, data["email"])
             except ValueError as e:
                 return Response({"integrity_error": e.message}, status=400)
 
-            user.email = data['email']
+            user.email = data["email"]
             user.save()
-            updated_fields.update({'email': data['email']})
+            updated_fields.update({"email": data["email"]})
 
         # update profile fields
         profile_fields = [
-            "name", "level_of_education", "gender", "mailing_address", "city",
-            "country", "goals", "bio", "year_of_birth", "language"
+            "name",
+            "level_of_education",
+            "gender",
+            "mailing_address",
+            "city",
+            "country",
+            "goals",
+            "bio",
+            "year_of_birth",
+            "language",
         ]
 
         profile_fields_to_update = {}
@@ -331,14 +347,16 @@ class UpdateUserAccount(APIView):
                     updated_fields.update(custom_profile_fields_to_update)
 
             if len(custom_profile_fields_to_update):
-                custom_form.Meta.model.objects.filter(user=user).update(
-                    **custom_profile_fields_to_update)
+                custom_form.Meta.model.objects.filter(user=user).update(**custom_profile_fields_to_update)
 
-        return Response({
-            "success": "The following fields has been updated: {}".format(
-                ', '.join(
-                    '{}={}'.format(f, v) for f, v in list(updated_fields.items())))
-        }, status=200)
+        return Response(
+            {
+                "success": "The following fields has been updated: {}".format(
+                    ", ".join("{}={}".format(f, v) for f, v in list(updated_fields.items()))
+                )
+            },
+            status=200,
+        )
 
 
 class GetUserAccountView(APIView):
@@ -359,21 +377,16 @@ class GetUserAccountView(APIView):
 
         """
         try:
-            account_settings = User.objects.select_related('profile').get(username=username)
+            account_settings = User.objects.select_related("profile").get(username=username)
         except User.DoesNotExist:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        return Response({'user_id': account_settings.username}, status=200)
+        return Response({"user_id": account_settings.username}, status=200)
 
 
 @can_disable_rate_limit
 class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
-    authentication_classes = (
-        BearerAuthenticationAllowInactiveUser,
-        EnrollmentCrossDomainSessionAuth
-    )
+    authentication_classes = (BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth)
     permission_classes = (ApiKeyHeaderPermissionIsAuthenticated,)
     throttle_classes = (EnrollmentUserThrottle,)
 
@@ -382,86 +395,74 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
         if serializer.is_valid():
             request._request.POST = request.data
             response_dict = {
-                'auto_enroll': serializer.data.get('auto_enroll'),
-                'email_students': serializer.data.get('email_students'),
-                'action': serializer.data.get('action'),
-                'courses': {}
+                "auto_enroll": serializer.data.get("auto_enroll"),
+                "email_students": serializer.data.get("email_students"),
+                "action": serializer.data.get("action"),
+                "courses": {},
             }
-            for course in serializer.data.get('courses'):
-                response = students_update_enrollment(
-                    request._request, course_id=course
-                )
-                response_dict['courses'][course] = json.loads(response.content.decode('utf-8'))
+            for course in serializer.data.get("courses"):
+                response = students_update_enrollment(request._request, course_id=course)
+                response_dict["courses"][course] = json.loads(response.content.decode("utf-8"))
             return Response(data=response_dict, status=status.HTTP_200_OK)
         else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GenerateRegistrationCodesView(APIView):
-    authentication_classes = (
-        BearerAuthenticationAllowInactiveUser,
-        EnrollmentCrossDomainSessionAuth
-    )
+    authentication_classes = (BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth)
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        course_id = CourseKey.from_string(request.data.get('course_id'))
+        course_id = CourseKey.from_string(request.data.get("course_id"))
 
         try:
-            course_code_number = int(
-                request.data.get('total_registration_codes')
-            )
+            course_code_number = int(request.data.get("total_registration_codes"))
         except ValueError:
-            course_code_number = int(
-                float(request.data.get('total_registration_codes'))
-            )
+            course_code_number = int(float(request.data.get("total_registration_codes")))
 
         course_mode = CourseMode.DEFAULT_MODE_SLUG
 
         registration_codes = []
         for __ in range(course_code_number):
             generated_registration_code = save_registration_code(
-                request.user, course_id, course_mode, order=None,
+                request.user,
+                course_id,
+                course_mode,
+                order=None,
             )
             registration_codes.append(generated_registration_code.code)
 
         return Response(
             data={
-                'codes': registration_codes,
-                'course_id': request.data.get('course_id'),
-                'course_url': reverse(
-                    'about_course',
-                    kwargs={'course_id': request.data.get('course_id')}
-                )
+                "codes": registration_codes,
+                "course_id": request.data.get("course_id"),
+                "course_url": reverse("about_course", kwargs={"course_id": request.data.get("course_id")}),
             }
         )
 
 
 class EnrollUserWithEnrollmentCodeView(APIView):
-    authentication_classes = (
-        BearerAuthenticationAllowInactiveUser,
-        EnrollmentCrossDomainSessionAuth
-    )
+    authentication_classes = (BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth)
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
         if is_ratelimited(request, key="user", group="enrollment-codes.enroll-user", rate="6/m"):
             raise Ratelimited()
 
-        enrollment_code = request.data.get('enrollment_code')
+        enrollment_code = request.data.get("enrollment_code")
         error_reason = ""
         try:
-            user = User.objects.get(email=request.data.get('email'))
+            user = User.objects.get(email=request.data.get("email"))
             user_is_valid = True
         except User.DoesNotExist:
             user_is_valid = False
             error_reason = "User not found"
         try:
-            reg_code_is_valid, reg_code_already_redeemed, course_registration = get_reg_code_validity(  # pylint: disable=line-too-long
-                enrollment_code,
-                request,
+            reg_code_is_valid, reg_code_already_redeemed, course_registration = (
+                get_reg_code_validity(  # pylint: disable=line-too-long
+                    enrollment_code,
+                    request,
+                )
             )
         except Http404:
             # only count toward the rate limiting if it was an invalid code
@@ -472,20 +473,22 @@ class EnrollUserWithEnrollmentCodeView(APIView):
         if user_is_valid and reg_code_is_valid and not reg_code_already_redeemed:
             course = get_course_by_id(course_registration.course_id, depth=0)
             redemption = RegistrationCodeRedemption.create_invoice_generated_registration_redemption(  # pylint: disable=line-too-long
-                course_registration,
-                user)
+                course_registration, user
+            )
             try:
                 kwargs = {}
                 if course_registration.mode_slug is not None:
                     if CourseMode.mode_for_course(course.id, course_registration.mode_slug):
-                        kwargs['mode'] = course_registration.mode_slug
+                        kwargs["mode"] = course_registration.mode_slug
                     else:
                         raise RedemptionCodeError()
                 redemption.course_enrollment = CourseEnrollment.enroll(user, course.id, **kwargs)
                 redemption.save()
-                return Response(data={
-                    'success': True,
-                })
+                return Response(
+                    data={
+                        "success": True,
+                    }
+                )
             except RedemptionCodeError:
                 error_reason = "Enrollment code error"
             except EnrollmentClosedError:
@@ -496,10 +499,10 @@ class EnrollUserWithEnrollmentCodeView(APIView):
                 error_reason = "Already enrolled"
         return Response(
             data={
-                'success': False,
-                'reason': error_reason,
+                "success": False,
+                "reason": error_reason,
             },
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -512,51 +515,44 @@ class EnrollmentCodeStatusView(APIView):
     restore: If the code was user for enroll an user, the user is unenrolled and the code becomes
     available for use it again.
     """
-    authentication_classes = (
-        BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth
-    )
+
+    authentication_classes = (BearerAuthenticationAllowInactiveUser, EnrollmentCrossDomainSessionAuth)
     permission_classes = (IsStaffOrOwner,)
 
     def post(self, request):
-        code = request.data.get('enrollment_code')
-        action = request.data.get('action')
+        code = request.data.get("enrollment_code")
+        action = request.data.get("action")
         try:
             registration_code = CourseRegistrationCode.objects.get(code=code)
         except CourseRegistrationCode.DoesNotExist:
             return Response(
-                data={
-                    'reason': 'The enrollment code ({code}) was not found'.format(code=code),
-                    'success': False},
-                status=400
+                data={"reason": "The enrollment code ({code}) was not found".format(code=code), "success": False},
+                status=400,
             )
         # check if the code was in use (redeemed)
         redemption = RegistrationCodeRedemption.get_registration_code_redemption(
             registration_code.code, registration_code.course_id
         )
-        if action == 'cancel':
+        if action == "cancel":
             if redemption:
                 # if was redeemed, unenroll the user from the course and delete the
                 # redemption object.
-                CourseEnrollment.unenroll(
-                    redemption.course_enrollment.user, registration_code.course_id
-                )
+                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
                 redemption.delete()
             # make the enrollment code unavailable
             registration_code.is_valid = False
             registration_code.save()
 
-        if action == 'restore':
+        if action == "restore":
             if redemption:
                 # if was redeemed, unenroll the user from the course and delete the
                 # redemption object.
-                CourseEnrollment.unenroll(
-                    redemption.course_enrollment.user, registration_code.course_id
-                )
+                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
                 redemption.delete()
             # make the enrollment code available
             registration_code.is_valid = True
             registration_code.save()
-        return Response(data={'success': True})
+        return Response(data={"success": True})
 
 
 class GetBatchUserDataView(APIView):
@@ -565,16 +561,16 @@ class GetBatchUserDataView(APIView):
 
     def get(self, request):
         """
-            /appsembler_api/v0/analytics/accounts/batch[?time-parameter]
+        /appsembler_api/v0/analytics/accounts/batch[?time-parameter]
 
-            time-parameter is an optional query parameter of:
-                ?updated_min=yyyy-mm-ddThh:mm:ss
-                ?updated_max=yyyy-mm-ddThh:mm:ss
-                ?updated_min=yyyy-mm-ddThh:mm:ss&updated_max=yyyy-mm-ddThh:mm:ss
+        time-parameter is an optional query parameter of:
+            ?updated_min=yyyy-mm-ddThh:mm:ss
+            ?updated_max=yyyy-mm-ddThh:mm:ss
+            ?updated_min=yyyy-mm-ddThh:mm:ss&updated_max=yyyy-mm-ddThh:mm:ss
 
         """
-        updated_min = request.GET.get('updated_min', '')
-        updated_max = request.GET.get('updated_max', '')
+        updated_min = request.GET.get("updated_min", "")
+        updated_max = request.GET.get("updated_max", "")
 
         users = User.objects.all()
         if updated_min:
@@ -588,11 +584,11 @@ class GetBatchUserDataView(APIView):
         user_list = []
         for user in users:
             user_data = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'is_active': user.is_active,
-                'date_joined': user.date_joined
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "is_active": user.is_active,
+                "date_joined": user.date_joined,
             }
             user_list.append(user_data)
 
@@ -683,30 +679,25 @@ class CourseListSearchView(DeveloperErrorViewMixin, ListAPIView):
         """
         Return a list of courses visible to the user.
         """
-        form = CourseListGetAndSearchForm(
-            self.request.query_params, initial={'requesting_user': self.request.user}
-        )
+        form = CourseListGetAndSearchForm(self.request.query_params, initial={"requesting_user": self.request.user})
         if not form.is_valid():
             raise ValidationError(form.errors)
 
         courses_db = list_courses(
             self.request,
-            form.cleaned_data['username'],
-            org=form.cleaned_data['org'],
-            filter_=form.cleaned_data['filter_'],
+            form.cleaned_data["username"],
+            org=form.cleaned_data["org"],
+            filter_=form.cleaned_data["filter_"],
         )
 
         courses_search = search.api.course_discovery_search(
-            form.cleaned_data['search_term'],
+            form.cleaned_data["search_term"],
             size=self.results_size_infinity,
         )
 
-        course_search_ids = {course['data']['id']: True for course in courses_search['results']}
+        course_search_ids = {course["data"]["id"]: True for course in courses_search["results"]}
 
-        return [
-            course for course in courses_db
-            if str(course.id) in course_search_ids
-        ]
+        return [course for course in courses_db if str(course.id) in course_search_ids]
 
 
 class GetBatchEnrollmentDataView(APIView):
@@ -728,61 +719,56 @@ class GetBatchEnrollmentDataView(APIView):
                 ?updated_min=yyyy-mm-ddThh:mm:ss&updated_max=yyyy-mm-ddThh:mm:ss
         """
 
-        updated_min = request.GET.get('updated_min', '')
-        updated_max = request.GET.get('updated_max', '')
-        course_id = request.GET.get('course_id')
-        username = request.GET.get('username')
+        updated_min = request.GET.get("updated_min", "")
+        updated_max = request.GET.get("updated_max", "")
+        course_id = request.GET.get("course_id")
+        username = request.GET.get("username")
 
         enrollment_query_filter = {}
         cert_query_filter = {}
 
         if course_id:
-            course_id = course_id.replace(' ', '+')
+            course_id = course_id.replace(" ", "+")
         # the replace function is because Django encodes '+' or '%2B' as spaces
 
         if course_id:
             course_key = CourseKey.from_string(course_id)
-            enrollment_query_filter['course_id'] = course_key
-            cert_query_filter['course_id'] = course_key
+            enrollment_query_filter["course_id"] = course_key
+            cert_query_filter["course_id"] = course_key
 
         if username:
-            enrollment_query_filter['user__username'] = username
-            cert_query_filter['user__username'] = username
+            enrollment_query_filter["user__username"] = username
+            cert_query_filter["user__username"] = username
 
         if updated_min:
             min_date = parser.parse(updated_min).replace(tzinfo=pytz.UTC)
-            enrollment_query_filter['created__gt'] = min_date
-            cert_query_filter['created_date__gt'] = min_date
+            enrollment_query_filter["created__gt"] = min_date
+            cert_query_filter["created_date__gt"] = min_date
 
         if updated_max:
             max_date = parser.parse(updated_max).replace(tzinfo=pytz.UTC)
-            enrollment_query_filter['created__lt'] = max_date
-            cert_query_filter['created_date__lt'] = max_date
+            enrollment_query_filter["created__lt"] = max_date
+            cert_query_filter["created_date__lt"] = max_date
 
-        user_ids_with_certs = GeneratedCertificate.objects.filter(**cert_query_filter).values('user_id')
+        user_ids_with_certs = GeneratedCertificate.objects.filter(**cert_query_filter).values("user_id")
 
-        enrollments = CourseEnrollment.objects.filter(
-            Q(user_id__in=user_ids_with_certs) | Q(**enrollment_query_filter))
+        enrollments = CourseEnrollment.objects.filter(Q(user_id__in=user_ids_with_certs) | Q(**enrollment_query_filter))
 
         enrollment_list = []
         for enrollment in enrollments:
             enrollment_data = {
-                'enrollment_id': enrollment.id,
-                'user_id': enrollment.user.id,
-                'username': enrollment.user.username,
-                'course_id': str(enrollment.course_id),
-                'date_enrolled': enrollment.created,
+                "enrollment_id": enrollment.id,
+                "user_id": enrollment.user.id,
+                "username": enrollment.user.username,
+                "course_id": str(enrollment.course_id),
+                "date_enrolled": enrollment.created,
             }
             try:
-                cert = GeneratedCertificate.objects.get(
-                    course_id=enrollment.course_id, user=enrollment.user
-                )
-                enrollment_data['certificate'] = {
-                    'completion_date': str(cert.created_date),
-                    'grade': cert.grade,
-                    'url': "{}/certificates/{}".format(
-                        request._request._current_scheme_host, cert.verify_uuid
-                    ),
+                cert = GeneratedCertificate.objects.get(course_id=enrollment.course_id, user=enrollment.user)
+                enrollment_data["certificate"] = {
+                    "completion_date": str(cert.created_date),
+                    "grade": cert.grade,
+                    "url": "{}/certificates/{}".format(request._request._current_scheme_host, cert.verify_uuid),
                 }
             except GeneratedCertificate.DoesNotExist:
                 pass

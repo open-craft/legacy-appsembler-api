@@ -9,22 +9,17 @@ from rest_framework import serializers
 
 class StringListField(serializers.ListField):
     def to_internal_value(self, data):
-        return data.split(',')
+        return data.split(",")
 
 
 class BulkEnrollmentSerializer(serializers.Serializer):
     """Serializes enrollment information for a collection of students/emails.
     This is mainly useful for implementing validation when performing bulk enrollment operations.
     """
+
     identifiers = serializers.CharField(required=True)
     courses = StringListField(required=True)
-    action = serializers.ChoiceField(
-        choices=(
-            ('enroll', 'enroll'),
-            ('unenroll', 'unenroll')
-        ),
-        required=True
-    )
+    action = serializers.ChoiceField(choices=(("enroll", "enroll"), ("unenroll", "unenroll")), required=True)
     auto_enroll = serializers.BooleanField(default=False)
     email_students = serializers.BooleanField(default=False)
 

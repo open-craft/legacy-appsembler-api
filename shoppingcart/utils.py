@@ -6,15 +6,20 @@ import logging
 import random
 import string
 
+from common.djangoapps.student.models import (
+    email_exists_or_retired,
+    username_exists_or_retired,
+)
 from django.conf import settings
-from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import Http404
-from common.djangoapps.student.models import email_exists_or_retired, username_exists_or_retired
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
-from openedx.core.djangoapps.user_authn.views.password_reset import PasswordResetFormNoActive
+from openedx.core.djangoapps.user_authn.views.password_reset import (
+    PasswordResetFormNoActive,
+)
 
 from .models import CourseRegistrationCode, RegistrationCodeRedemption
 
@@ -56,10 +61,10 @@ def auto_generate_username(email):
     except ValidationError:
         raise ValueError("Email is a invalid format")
 
-    username = ''.join(e for e in email.split('@')[0] if e.isalnum())
+    username = "".join(e for e in email.split("@")[0] if e.isalnum())
 
     while account_exists(username=username, email=None):
-        username = ''.join(e for e in email.split('@')[0] if e.isalnum()) + str(random.randint(100, 999))
+        username = "".join(e for e in email.split("@")[0] if e.isalnum()) + str(random.randint(100, 999))
 
     return username
 
@@ -69,11 +74,11 @@ def send_activation_email(request):
     if form.is_valid():
         form.save(
             use_https=request.is_secure(),
-            from_email=configuration_helpers.get_value(
-                'email_from_address', settings.DEFAULT_FROM_EMAIL),
+            from_email=configuration_helpers.get_value("email_from_address", settings.DEFAULT_FROM_EMAIL),
             request=request,
-            subject_template_name='appsembler_api/set_password_subject.txt',
-            email_template_name='appsembler_api/set_password_email.html')
+            subject_template_name="appsembler_api/set_password_subject.txt",
+            email_template_name="appsembler_api/set_password_email.html",
+        )
         return True
     else:
         return False
@@ -96,7 +101,7 @@ def get_reg_code_validity(registration_code, request):
             reg_code_is_valid = False
         reg_code_already_redeemed = RegistrationCodeRedemption.is_registration_code_redeemed(registration_code)
     if not reg_code_is_valid:
-        AUDIT_LOG.info(u"Redemption of a invalid RegistrationCode %s", registration_code)
+        AUDIT_LOG.info("Redemption of a invalid RegistrationCode %s", registration_code)
         raise Http404()
 
     return reg_code_is_valid, reg_code_already_redeemed, course_registration
@@ -107,10 +112,9 @@ def generate_random_string(length):
     Create a string of random characters of specified length
     """
     chars = [
-        char for char in string.ascii_uppercase + string.digits + string.ascii_lowercase
-        if char not in 'aAeEiIoOuU1l'
+        char for char in string.ascii_uppercase + string.digits + string.ascii_lowercase if char not in "aAeEiIoOuU1l"
     ]
-    return ''.join((random.choice(chars) for i in range(length)))
+    return "".join((random.choice(chars) for i in range(length)))
 
 
 def random_code_generator():
@@ -118,7 +122,7 @@ def random_code_generator():
     generate a random alphanumeric code of length defined in
     REGISTRATION_CODE_LENGTH settings
     """
-    code_length = getattr(settings, 'REGISTRATION_CODE_LENGTH', 8)
+    code_length = getattr(settings, "REGISTRATION_CODE_LENGTH", 8)
     return generate_random_string(code_length)
 
 
@@ -148,7 +152,7 @@ def save_registration_code(user, course_id, mode_slug, invoice=None, order=None,
         invoice=invoice,
         order=order,
         mode_slug=mode_slug,
-        invoice_item=invoice_item
+        invoice_item=invoice_item,
     )
     try:
         with transaction.atomic():
@@ -161,5 +165,6 @@ def save_registration_code(user, course_id, mode_slug, invoice=None, order=None,
 
 
 class RedemptionCodeError(Exception):
-    """An error occurs while processing redemption codes. """
+    """An error occurs while processing redemption codes."""
+
     pass
