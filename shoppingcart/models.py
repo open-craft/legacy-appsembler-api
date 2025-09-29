@@ -2,10 +2,12 @@
 Database models for appsembler_api.
 """
 
-from django.contrib.auth.models import User
+from common.djangoapps.student.models import CourseEnrollment
+from django.contrib import auth
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
-from common.djangoapps.student.models import CourseEnrollment
+
+User = auth.get_user_model()
 
 
 class CourseRegistrationCode(models.Model):
@@ -15,19 +17,22 @@ class CourseRegistrationCode(models.Model):
 
     .. no_pii:
     """
-    class Meta(object):
+
+    class Meta:
         app_label = "shoppingcart"
 
     code = models.CharField(max_length=32, db_index=True, unique=True)
     course_id = CourseKeyField(max_length=255, db_index=True)
-    created_by = models.ForeignKey(User, related_name='created_by_user', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, related_name="created_by_user", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     order = models.IntegerField(null=True)  # this was originally a foreign key to Order, but we don't use that
     mode_slug = models.CharField(max_length=100, null=True)
     is_valid = models.BooleanField(default=True)
 
     invoice = models.IntegerField(null=True)  # this was originally a foreign key to Invoice, but we don't use that
-    invoice_item = models.IntegerField(null=True)  # this was originally a foreign key to CourseRegistrationCodeInvoiceItem, but we don't use that
+    invoice_item = models.IntegerField(
+        null=True
+    )  # this was originally a foreign key to CourseRegistrationCodeInvoiceItem, but we don't use that
 
 
 class RegistrationCodeRedemption(models.Model):
@@ -36,7 +41,8 @@ class RegistrationCodeRedemption(models.Model):
 
     .. no_pii:
     """
-    class Meta(object):
+
+    class Meta:
         app_label = "shoppingcart"
 
     order = models.IntegerField(null=True)  # this was originally a foreign key to Order, but we don't use that

@@ -11,13 +11,13 @@ class AppsemblerApiConfig(AppConfig):
     Configuration for the appsembler_api Django application.
     """
 
-    name = 'shoppingcart'
+    name = "shoppingcart"
     plugin_app = {
         PluginURLs.CONFIG: {
             ProjectType.LMS: {
-                PluginURLs.NAMESPACE: 'appsembler_api',
-                PluginURLs.REGEX: '^appsembler_api/v0/',
-                PluginURLs.RELATIVE_PATH: 'urls',
+                PluginURLs.NAMESPACE: "appsembler_api",
+                PluginURLs.REGEX: "^appsembler_api/v0/",
+                PluginURLs.RELATIVE_PATH: "urls",
             }
         },
     }

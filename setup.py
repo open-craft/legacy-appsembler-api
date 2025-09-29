@@ -18,12 +18,12 @@ def get_version(*file_paths):
                    version string
     """
     filename = os.path.join(os.path.dirname(__file__), *file_paths)
-    version_file = open(filename).read()
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
+    with open(filename, encoding="utf-8") as version_file_handle:
+        version_file = version_file_handle.read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
         return version_match.group(1)
-    raise RuntimeError('Unable to find version string.')
+    raise RuntimeError("Unable to find version string.")
 
 
 def load_requirements(*requirements_paths):
@@ -49,14 +49,15 @@ def load_requirements(*requirements_paths):
             # fine to add constraints to an unconstrained package,
             # raise an error if there are already constraints in place
             if existing_version_constraints and existing_version_constraints != version_constraints:
-                raise BaseException('Multiple constraint definitions found for {package}:'
-                                    ' "{existing_version_constraints}" and "{version_constraints}".'
-                                    'Combine constraints into one location with {package}'
-                                    '{existing_version_constraints},{version_constraints}.'.format(
-                                        package=package,
-                                        existing_version_constraints=existing_version_constraints,
-                                        version_constraints=version_constraints
-                                    )
+                raise BaseException(
+                    "Multiple constraint definitions found for {package}:"
+                    ' "{existing_version_constraints}" and "{version_constraints}".'
+                    "Combine constraints into one location with {package}"
+                    "{existing_version_constraints},{version_constraints}.".format(
+                        package=package,
+                        existing_version_constraints=existing_version_constraints,
+                        version_constraints=version_constraints,
+                    )
                 )
             if add_if_not_present or package in current_requirements:
                 current_requirements[package] = version_constraints
@@ -64,25 +65,25 @@ def load_requirements(*requirements_paths):
     # read requirements from .in
     # store the path to any constraint files that are pulled in
     for path in requirements_paths:
-        with open(path) as reqs:
+        with open(path, encoding="utf-8") as reqs:
             for line in reqs:
                 if is_requirement(line):
                     add_version_constraint_or_raise(line, requirements, True)
-                if line and line.startswith('-c') and not line.startswith('-c http'):
-                    constraint_files.add(os.path.dirname(path) + '/' +
-                        line.split('#')[0].replace('-c', '').strip())
+                if line and line.startswith("-c") and not line.startswith("-c http"):
+                    constraint_files.add(os.path.dirname(path) + "/" + line.split("#")[0].replace("-c", "").strip())
 
     # process constraint files: add constraints to existing requirements
     for constraint_file in constraint_files:
-        with open(constraint_file) as reader:
+        with open(constraint_file, encoding="utf-8") as reader:
             for line in reader:
                 if is_requirement(line):
                     add_version_constraint_or_raise(line, requirements, False)
 
     # process back into list of pkg><=constraints strings
-    constrained_requirements = ['{pkg}{version}'.format(
-        pkg=pkg, version=version or "") for (pkg, version) in sorted(requirements.items())
+    constrained_requirements = [
+        "{pkg}{version}".format(pkg=pkg, version=version or "") for (pkg, version) in sorted(requirements.items())
     ]
+    return constrained_requirements
 
 
 def is_requirement(line):
@@ -96,46 +97,44 @@ def is_requirement(line):
     return line and line.strip() and not line.startswith(("-r", "#", "-e", "git+", "-c"))
 
 
-VERSION = get_version('shoppingcart', '__init__.py')
+VERSION = get_version("shoppingcart", "__init__.py")
 
-if sys.argv[-1] == 'tag':
+if sys.argv[-1] == "tag":
     print("Tagging the version on github:")
     os.system("git tag -a %s -m 'version %s'" % (VERSION, VERSION))
     os.system("git push --tags")
     sys.exit()
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
-CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst')).read()
+with open(os.path.join(os.path.dirname(__file__), "README.md"), encoding="utf-8") as f:
+    README = f.read()
+with open(os.path.join(os.path.dirname(__file__), "CHANGELOG.rst"), encoding="utf-8") as f:
+    CHANGELOG = f.read()
 
 setup(
-    name='shoppingcart',
+    name="shoppingcart",
     version=VERSION,
     description="""Provides otherwise deprecated appsembler_api as a plugin LMS app""",
-    long_description=README + '\n\n' + CHANGELOG,
-    author='Appsembler, Inc.',
-    author_email='john@appsembler.com',
-    url='https://github.com/appsembler/legacy-appsembler-api',
+    long_description=README + "\n\n" + CHANGELOG,
+    author="Appsembler, Inc.",
+    author_email="john@appsembler.com",
+    url="https://github.com/appsembler/legacy-appsembler-api",
     packages=[
-        'shoppingcart',
+        "shoppingcart",
     ],
     include_package_data=True,
-    install_requires=load_requirements('requirements/base.in'),
+    install_requires=load_requirements("requirements/base.in"),
     python_requires=">=3.5",
     zip_safe=False,
-    keywords='Python edx',
+    keywords="Python edx",
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Framework :: Django',
-        'Framework :: Django :: 2.2',
-        'Intended Audience :: Developers',
-        'License :: Other/Proprietary License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
+        "Development Status :: 3 - Alpha",
+        "Framework :: Django",
+        "Framework :: Django :: 2.2",
+        "Intended Audience :: Developers",
+        "License :: Other/Proprietary License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
     ],
-    entry_points={
-        'lms.djangoapp': [
-            'shoppingcart = shoppingcart.apps:AppsemblerApiConfig'
-        ]
-    }
+    entry_points={"lms.djangoapp": ["shoppingcart = shoppingcart.apps:AppsemblerApiConfig"]},
 )
