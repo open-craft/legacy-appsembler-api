@@ -138,10 +138,15 @@ Expect a json response with with status 200, that looks like:
 This endpoint is a wrapper around the built-in `login_session` endpoint.
 It sets a CSRF cookie that can be used cross-domain - see [CsrfCrossDomainCookieMiddleware](https://github.com/openedx/edx-platform/blob/open-release/sumac.master/openedx/core/djangoapps/cors_csrf/middleware.py#L85-L89) for more information on configuring that feature.
 
-Test it by logging in (requires the CSRF token cookie AND the CSRF token header):
+Requests to this endpoint require both the CSRF token cookie *and* the CSRF token header.
+If you see CSRF errors in the response, regenerate the CSRF token cookie and header by repeating
+the "Retrieve a CSRF token" step from earlier.
+
+Test it by logging in
+):
 
 ```sh
-curl --show-headers -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
+curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
   --cookie csrf_cookies.txt \
   --header "x-CSRFToken: $CSRF_TOKEN" \
   --header 'Content-Type: multipart/form-data' \
@@ -158,10 +163,14 @@ Expect a json response with status 200 and the following body:
 }
 ```
 
-Try again with an incorrect password:
+Try again with an incorrect password.
+First, repeat the "Retrieve a CSRF token" step from earlier to generate a new CSRF token,
+then you can run:
 
 ```sh
 curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
+  --cookie csrf_cookies.txt \
+  --header "x-CSRFToken: $CSRF_TOKEN" \
   --header 'Content-Type: multipart/form-data' \
   --form 'email=apicreated4@example.com' \
   --form 'password=notmypassword'
@@ -698,10 +707,10 @@ In the web UI, verify the user is once again no longer enrolled in the demo cour
 One final time, attempt to enroll the user in the course using the same code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/status' \
+curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
-    "action": "restore",
+    "email": "apicreated1@example.com",
     "enrollment_code": "PY4ngLKw"
 }' \
   --header "Authorization: Bearer $BEARER_TOKEN"
@@ -731,7 +740,7 @@ curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/accounts/b
 
 Verify the response has status 200 and the body has a json list of all users:
 
-```json
+```json5
 [
   {
     "id": 2,
@@ -754,7 +763,8 @@ Verify the response has status 200 and the body has a json list of all users:
     "is_active": true,
     "date_joined": "2025-09-29T07:05:03.092197Z"
   },
-  ...
+  // ...
+]
 ```
 
 You can also filter by date joined - for example (adjust the dates to suite when you run this):

@@ -27,6 +27,7 @@ tutor mounts add ./legacy-appsembler-api
 
 # This directory won't be autodetected for build-time mount by Tutor,
 # so we need to manually configure Tutor for it.
+TUTOR_PLUGINS_ROOT="$(tutor plugins printroot)"
 mkdir -p "$TUTOR_PLUGINS_ROOT"
 echo 'from tutor import hooks; hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "legacy-appsembler-api"))' > "$TUTOR_PLUGINS_ROOT/legacy-appsembler-api.py"
 tutor plugins enable legacy-appsembler-api
