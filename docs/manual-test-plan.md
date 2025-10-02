@@ -21,7 +21,7 @@ Prerequisites:
   ```sh
   tutor dev do importdemocourse
   ```
-
+- A Bash-like shell, `curl`, and `jq` installed.
 
 See also the [apidocs](./apidocs.md) for reference.
 They may be a little outdated, but they give the general idea.
@@ -50,7 +50,7 @@ curl -X POST 'http://local.openedx.io:8000/oauth2/access_token' \
   --form "client_id=$CLIENT_ID" \
   --form "client_secret=$CLIENT_SECRET" \
   --form "token_type=bearer" \
-  --form "grant_type=client_credentials"
+  --form "grant_type=client_credentials" | jq
 ```
 
 The output will look something like this:
@@ -76,7 +76,7 @@ Some API endpoints require a CSRF token. You can generate one with:
 
 ```sh
 curl -X GET 'http://local.openedx.io:8000/csrf/api/v1/token' \
-  --cookie-jar csrf_cookies.txt
+  --cookie-jar csrf_cookies.txt | jq
 ```
 
 The output will look like:
@@ -113,7 +113,7 @@ Either way, the requests provided below for testing are formatted as curl comman
 Example:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/create' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/create' \
   --header 'Content-Type: application/json' \
   --data '{
     "username": "apicreated4",
@@ -122,7 +122,7 @@ curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/create' \
     "name": "my name",
     "send_activation_email": "False"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Expect a json response with with status 200, that looks like:
@@ -142,16 +142,15 @@ Requests to this endpoint require both the CSRF token cookie *and* the CSRF toke
 If you see CSRF errors in the response, regenerate the CSRF token cookie and header by repeating
 the "Retrieve a CSRF token" step from earlier.
 
-Test it by logging in
-):
+Test it by logging in:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
   --cookie csrf_cookies.txt \
   --header "x-CSRFToken: $CSRF_TOKEN" \
   --header 'Content-Type: multipart/form-data' \
   --form 'email=apicreated4@example.com' \
-  --form 'password=mypassword'
+  --form 'password=mypassword' | jq
 ```
 
 Expect a json response with status 200 and the following body:
@@ -168,7 +167,7 @@ First, repeat the "Retrieve a CSRF token" step from earlier to generate a new CS
 then you can run:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/account/login_session/' \
   --cookie csrf_cookies.txt \
   --header "x-CSRFToken: $CSRF_TOKEN" \
   --header 'Content-Type: multipart/form-data' \
@@ -201,13 +200,13 @@ You shouldn't encounter this when using Curl,
 but if you use an API client that tracks cookies, please clear cookies after each request here.
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "user-without-password@example.com",
     "name": "Name 1"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and the following json body:
@@ -222,13 +221,13 @@ Verify the response has status 200 and the following json body:
 Now try again with a subtly different email address to check that it can generate unique usernames:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "user--without-password@example.com",
     "name": "Name 2"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200, and a json body that looks like this
@@ -244,13 +243,13 @@ Verify the response has status 200, and a json body that looks like this
 Finally, try again with the same email address to verify it blocks duplicate emails with a custom response code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
+curl -w "%{stderr}%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/user_without_password' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "user--without-password@example.com",
     "name": "Name 2"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 409 (Conflict), and the following json body:
@@ -267,7 +266,7 @@ Given a username, the connect endpoint can change the email, password, and name 
 Run this to update details for the `apicreated4` user you created in the first step to create a user:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/connect' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/connect' \
   --header 'Content-Type: application/json' \
   --data '{
     "username": "apicreated4",
@@ -275,7 +274,7 @@ curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/connect' \
     "email": "newemail@example.com",
     "name": "my new name"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify you get a response with status 200 and a json body that looks like:
@@ -294,10 +293,10 @@ with the username and new password from above.
 This endpoint is used for checking if a user exists:
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/accounts/get-user/apicreated4' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/accounts/get-user/apicreated4' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and the following json body:
@@ -311,10 +310,10 @@ Verify the response has status 200 and the following json body:
 Test with a non-existing user:
 
 ```sh
-curl --show-headers -X GET 'http://local.openedx.io:8000/appsembler_api/v0/accounts/get-user/doesnotexist' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/accounts/get-user/doesnotexist' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the status code is 404.
@@ -324,7 +323,7 @@ Verify the status code is 404.
 The update user endpoint supports updating many fields from a user's profile:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/update_user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/update_user' \
   --header 'Content-Type: application/json' \
   --data '{
     "user_lookup": "apicreated4",
@@ -337,7 +336,7 @@ curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/accounts/update_use
     "gender": "m",
     "language": "EN"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response confirms the fields have been updated:
@@ -355,10 +354,10 @@ You can also log in to the web UI and view profile information on http://apps.lo
 There is an endpoint to search for courses:
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/search_courses?search_term=demo&org=openedx' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/search_courses?search_term=demo&org=openedx' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify this search above returns the demo course:
@@ -416,10 +415,10 @@ Verify this search above returns the demo course:
 Search for something that doesn't exist:
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/search_courses?search_term=demo&org=openedxnth' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/search_courses?search_term=demo&org=openedxnth' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response still has 200 status, but returns this json body:
@@ -443,7 +442,7 @@ and a `username` to filter by courses that are visible to that user.
 
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/bulk-enrollment/bulk-enroll' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/bulk-enrollment/bulk-enroll' \
   --header 'Content-Type: application/json' \
   --data '{
     "action": "enroll",
@@ -452,7 +451,7 @@ curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/bulk-enrollment/bul
     "email_students": true,
     "courses": "course-v1:OpenedX+DemoX+DemoCourse"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and shows the results:
@@ -513,13 +512,13 @@ This is functionality for providing a single-user code tied to a course,
 allowing a user to be enrolled in that course by providing that code later.
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/generate' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/generate' \
   --header 'Content-Type: application/json' \
   --data '{
     "total_registration_codes": "3",
     "course_id": "course-v1:OpenedX+DemoX+DemoCourse"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status code 200 and json body with information about the course and the desired number of codes:
@@ -536,18 +535,25 @@ Verify the response has status code 200 and json body with information about the
 }
 ```
 
+Save two codes for the next steps:
+
+```sh
+ENROLLMENT_CODE1="YOURCODE1"
+ENROLLMENT_CODE2="YOURCODE2"
+```
+
 ### Test enrolling users with enrollment codes
 
 Now you can enroll a user in the demo course using one of those codes:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "apicreated1@example.com",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify a success response is returned:
@@ -566,13 +572,13 @@ and verify the user is enrolled in the Open edX Demo Course.
 Test enrolling again with the same code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "apicreated1@example.com",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 The code is single use, so verify the response has status 400, and the following json body:
@@ -589,13 +595,13 @@ NOTE: it may be a minor bug that the reason is empty here.
 Try again with a code that does not exist:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "apicreated1@example.com",
     "enrollment_code": "doesnotexist"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 400, and the following json body:
@@ -607,16 +613,17 @@ Verify the response has status 400, and the following json body:
 }
 ```
 
-Finally, test the case where the user does not exist, but the enrollment code is valid:
+Finally, test the case where the user does not exist, but the enrollment code is valid
+(pick one of the other unused enrollment codes):
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "doesnotexist@example.com",
-    "enrollment_code": "zbKy2BbR"
+    "enrollment_code": "'"$ENROLLMENT_CODE2"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 400 and the following json body:
@@ -640,13 +647,13 @@ Let's restore the enrollment code that was used earlier to enroll the "apicreate
 
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/status' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/status' \
   --header 'Content-Type: application/json' \
   --data '{
     "action": "restore",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and the following json body:
@@ -663,13 +670,13 @@ and verify the user is no longer enrolled in the demo course.
 Enroll the user in the demo course again using the same (restored) code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "apicreated1@example.com",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify a success response is returned:
@@ -685,13 +692,13 @@ In the web UI, verify the user is enrolled again in the demo course.
 Now cancel the enrollment code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/status' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/status' \
   --header 'Content-Type: application/json' \
   --data '{
     "action": "cancel",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and the following json body:
@@ -707,13 +714,13 @@ In the web UI, verify the user is once again no longer enrolled in the demo cour
 One final time, attempt to enroll the user in the course using the same code:
 
 ```sh
-curl -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx.io:8000/appsembler_api/v0/enrollment-codes/enroll-user' \
   --header 'Content-Type: application/json' \
   --data '{
     "email": "apicreated1@example.com",
-    "enrollment_code": "PY4ngLKw"
+    "enrollment_code": "'"$ENROLLMENT_CODE1"'"
 }' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 400 and the following json body:
@@ -725,6 +732,8 @@ Verify the response has status 400 and the following json body:
 }
 ```
 
+In the web UI, verify the user is still not enrolled in the demo course.
+
 ### Test the accounts analytics endpoint
 
 This shows information about user accounts, and can filter by date joined.
@@ -732,10 +741,10 @@ This shows information about user accounts, and can filter by date joined.
 You can get a list of all the users on the platform with:
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/accounts/batch' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/accounts/batch' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and the body has a json list of all users:
@@ -770,10 +779,10 @@ Verify the response has status 200 and the body has a json list of all users:
 You can also filter by date joined - for example (adjust the dates to suite when you run this):
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/accounts/batch?updated_max=2025-10-03&updated_min=2025-09-29' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/accounts/batch?updated_max=2025-10-03&updated_min=2025-09-29' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response looks similar to the to the previous response,
@@ -787,10 +796,10 @@ and you can filter by `course_id`, `username`, `updated_min` (date), and `update
 For example to get all enrollments in the demo course:
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/enrollment/batch?course_id=course-v1%3AOpenedX%2BDemoX%2BDemoCourse' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/enrollment/batch?course_id=course-v1%3AOpenedX%2BDemoX%2BDemoCourse' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response has status 200 and a json body that looks like:
@@ -810,10 +819,10 @@ Verify the response has status 200 and a json body that looks like:
 An example that uses all the filters (modify as desired to test for applicable dates and usernames):
 
 ```sh
-curl -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/enrollment/batch?updated_max=2031-01-01&updated_min=2025-09-01&username=apicreated4&course_id=course-v1%3AOpenedX%2BDemoX%2BDemoCourse' \
+curl -w "%{stderr}\nResponse code: %{http_code}\n" -X GET 'http://local.openedx.io:8000/appsembler_api/v0/analytics/enrollment/batch?updated_max=2031-01-01&updated_min=2025-09-01&username=apicreated4&course_id=course-v1%3AOpenedX%2BDemoX%2BDemoCourse' \
   --header 'Content-Type: application/json' \
   --data '' \
-  --header "Authorization: Bearer $BEARER_TOKEN"
+  --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
 Verify the response returns results as expected.
