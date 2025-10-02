@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-asgiref==3.9.1
+asgiref==3.9.2
     # via
     #   -r requirements/quality.txt
     #   django
@@ -31,8 +31,6 @@ cffi==2.0.0
     # via
     #   -r requirements/quality.txt
     #   cryptography
-chardet==5.2.0
-    # via diff-cover
 charset-normalizer==3.4.3
     # via
     #   -r requirements/quality.txt
@@ -54,16 +52,10 @@ code-annotations==2.3.0
     # via
     #   -r requirements/quality.txt
     #   edx-lint
-coverage[toml]==7.10.7
-    # via
-    #   -r requirements/quality.txt
-    #   pytest-cov
 cryptography==46.0.1
     # via
     #   -r requirements/quality.txt
     #   secretstorage
-diff-cover==9.6.0
-    # via -r requirements/dev.in
 dill==0.4.0
     # via
     #   -r requirements/quality.txt
@@ -102,10 +94,6 @@ importlib-metadata==8.7.0
     # via
     #   -r requirements/quality.txt
     #   keyring
-iniconfig==2.1.0
-    # via
-    #   -r requirements/quality.txt
-    #   pytest
 isort==6.0.1
     # via
     #   -r requirements/quality.txt
@@ -131,7 +119,6 @@ jinja2==3.1.6
     # via
     #   -r requirements/quality.txt
     #   code-annotations
-    #   diff-cover
 keyring==25.6.0
     # via
     #   -r requirements/quality.txt
@@ -146,7 +133,7 @@ markdown-it-py==4.0.0
     # via
     #   -r requirements/quality.txt
     #   rich
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via
     #   -r requirements/quality.txt
     #   jinja2
@@ -177,7 +164,6 @@ packaging==25.0
     #   -r requirements/quality.txt
     #   black
     #   build
-    #   pytest
     #   tox
     #   twine
 path==16.16.0
@@ -195,29 +181,18 @@ platformdirs==4.4.0
     #   pylint
     #   virtualenv
 pluggy==1.6.0
-    # via
-    #   -r requirements/quality.txt
-    #   diff-cover
-    #   pytest
-    #   pytest-cov
-    #   tox
+    # via tox
 polib==1.2.0
     # via edx-i18n-tools
 py==1.11.0
     # via tox
-pycodestyle==2.14.0
-    # via -r requirements/quality.txt
 pycparser==2.23
     # via
     #   -r requirements/quality.txt
     #   cffi
-pydocstyle==6.3.0
-    # via -r requirements/quality.txt
 pygments==2.19.2
     # via
     #   -r requirements/quality.txt
-    #   diff-cover
-    #   pytest
     #   readme-renderer
     #   rich
 pylint==3.3.8
@@ -245,15 +220,6 @@ pyproject-hooks==1.2.0
     #   -r requirements/pip-tools.txt
     #   build
     #   pip-tools
-pytest==8.4.2
-    # via
-    #   -r requirements/quality.txt
-    #   pytest-cov
-    #   pytest-django
-pytest-cov==7.0.0
-    # via -r requirements/quality.txt
-pytest-django==4.11.1
-    # via -r requirements/quality.txt
 python-slugify==8.0.4
     # via
     #   -r requirements/quality.txt
@@ -262,7 +228,7 @@ pytokens==0.1.10
     # via
     #   -r requirements/quality.txt
     #   black
-pyyaml==6.0.2
+pyyaml==6.0.3
     # via
     #   -r requirements/quality.txt
     #   code-annotations
@@ -298,10 +264,6 @@ six==1.17.0
     #   -r requirements/quality.txt
     #   edx-lint
     #   tox
-snowballstemmer==3.0.1
-    # via
-    #   -r requirements/quality.txt
-    #   pydocstyle
 sqlparse==0.5.3
     # via
     #   -r requirements/quality.txt

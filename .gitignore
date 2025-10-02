@@ -61,3 +61,6 @@ docs/appsembler_api.*.rst
 # Private requirements
 requirements/private.in
 requirements/private.txt
+
+# cookie file for manual tests
+csrf_cookies.txt

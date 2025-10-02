@@ -117,7 +117,7 @@ setup(
     long_description=README + "\n\n" + CHANGELOG,
     author="Appsembler, Inc.",
     author_email="john@appsembler.com",
-    url="https://github.com/appsembler/legacy-appsembler-api",
+    url="https://github.com/open-craft/legacy-appsembler-api",
     packages=[
         "shoppingcart",
     ],
@@ -129,12 +129,10 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Django",
-        "Framework :: Django :: 2.2",
         "Intended Audience :: Developers",
-        "License :: Other/Proprietary License",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
     ],
     entry_points={"lms.djangoapp": ["shoppingcart = shoppingcart.apps:AppsemblerApiConfig"]},
 )
