@@ -568,6 +568,7 @@ Log in to the web UI as the "apicreated1@example.com" user
 (username "apicreated4"; sorry, that's confusing; password "newpassword"),
 and verify the user is enrolled in the Open edX Demo Course.
 
+**NOTE: This next test, for reusing an enrollment code, will fail. You will be able to reuse the code even though you should not be able to. See [this PR](https://github.com/open-craft/legacy-appsembler-api/pull/5) for details.**
 
 Test enrolling again with the same code:
 
