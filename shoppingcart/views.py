@@ -1,6 +1,5 @@
 """Views for the API"""
 
-import json
 import logging
 import secrets
 import string
@@ -30,7 +29,7 @@ from edx_rest_framework_extensions.paginators import NamespacedPageNumberPaginat
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.course_api.api import list_courses
 from lms.djangoapps.course_api.serializers import CourseSerializer
-from lms.djangoapps.instructor.views.api import students_update_enrollment
+from lms.djangoapps.instructor.views.api import StudentsUpdateEnrollmentView
 from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.enrollments.views import (
     ApiKeyPermissionMixIn,
@@ -402,19 +401,20 @@ class BulkEnrollView(APIView, ApiKeyPermissionMixIn):
     def post(self, request):
         serializer = BulkEnrollmentSerializer(data=request.data)
         if serializer.is_valid():
-            request._request.POST = request.data  # pylint: disable=protected-access
             response_dict = {
                 "auto_enroll": serializer.data.get("auto_enroll"),
                 "email_students": serializer.data.get("email_students"),
                 "action": serializer.data.get("action"),
                 "courses": {},
             }
+            view = StudentsUpdateEnrollmentView()
             for course in serializer.data.get("courses"):
-                response = students_update_enrollment(
-                    request._request,  # pylint: disable=protected-access
+                response_dict["courses"][course] = view._process_student_enrollment(  # pylint: disable=protected-access
+                    user=request.user,
                     course_id=course,
+                    data=request.data,
+                    secure=request.is_secure(),
                 )
-                response_dict["courses"][course] = json.loads(response.content.decode("utf-8"))
             return Response(data=response_dict, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
