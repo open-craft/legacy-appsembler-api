@@ -568,7 +568,7 @@ Log in to the web UI as the "apicreated1@example.com" user
 (username "apicreated4"; sorry, that's confusing; password "newpassword"),
 and verify the user is enrolled in the Open edX Demo Course.
 
-**NOTE: This next test, for reusing an enrollment code, will fail. You will be able to reuse the code even though you should not be able to. See [this PR](https://github.com/open-craft/legacy-appsembler-api/pull/5) for details.**
+**NOTE: Since [this PR](https://github.com/open-craft/legacy-appsembler-api/pull/5), enrollment codes are no longer single use. Redeeming the same code again succeeds and creates an additional redemption, as the client's code depends on this behavior.**
 
 Test enrolling again with the same code:
 
@@ -582,16 +582,17 @@ curl -w "%{stderr}\nResponse code: %{http_code}\n" -X POST 'http://local.openedx
   --header "Authorization: Bearer $BEARER_TOKEN" | jq
 ```
 
-The code is single use, so verify the response has status 400, and the following json body:
+Verify the response has status 200 and the following json body:
 
 ```json
 {
-  "success": false,
-  "reason": ""
+  "success": true
 }
 ```
 
-NOTE: it may be a minor bug that the reason is empty here.
+NOTE: this creates an extra redemption row for the code. The status endpoint
+handles multiple redemptions for a single code (see "Test changing enrollment
+code status" below).
 
 Try again with a code that does not exist:
 
@@ -643,6 +644,8 @@ The enrollment-codes/status endpoint supports cancelling or restoring an enrollm
 
 - "cancel": invalidate the code. Also unenroll the user from the course if the code was used.
 - "restore": Make the code valid and ready to use again. Also unenroll the user from the course if the code was used.
+
+**NOTE: If the code was redeemed more than once (see "Test enrolling users with enrollment codes"), cancel/restore removes all redemptions for the code, not just one.**
 
 Let's restore the enrollment code that was used earlier to enroll the "apicreated4" user:
 
