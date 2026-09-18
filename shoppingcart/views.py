@@ -533,28 +533,20 @@ class EnrollmentCodeStatusView(APIView):
                 data={"reason": "The enrollment code ({code}) was not found".format(code=code), "success": False},
                 status=400,
             )
-        # check if the code was in use (redeemed)
-        redemption = RegistrationCodeRedemption.get_registration_code_redemption(
+        # get all redemptions (tolerates duplicates and orphaned rows)
+        redemptions = RegistrationCodeRedemption.get_registration_code_redemptions(
             registration_code.code, registration_code.course_id
         )
-        if action == "cancel":
-            if redemption:
-                # if was redeemed, unenroll the user from the course and delete the
-                # redemption object.
-                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
-                redemption.delete()
-            # make the enrollment code unavailable
-            registration_code.is_valid = False
-            registration_code.save()
 
-        if action == "restore":
-            if redemption:
-                # if was redeemed, unenroll the user from the course and delete the
-                # redemption object.
-                CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
-                redemption.delete()
-            # make the enrollment code available
-            registration_code.is_valid = True
+        if action in ("cancel", "restore"):
+            for redemption in redemptions:
+                # orphaned redemptions (e.g. where enrollment previously failed) may
+                # lack a linked enrollment; skip the unenroll step for those.
+                if redemption.course_enrollment is not None:
+                    CourseEnrollment.unenroll(redemption.course_enrollment.user, registration_code.course_id)
+            redemptions.delete()
+            # make the code available if the action is restore, otherwise make it unavailable
+            registration_code.is_valid = action == "restore"
             registration_code.save()
         return Response(data={"success": True})
 
