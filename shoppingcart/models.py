@@ -60,15 +60,17 @@ class RegistrationCodeRedemption(models.Model):
         return cls.objects.filter(registration_code__code=course_reg_code).exists()
 
     @classmethod
-    def get_registration_code_redemption(cls, code, course_id):
+    def get_registration_code_redemptions(cls, code, course_id):
         """
-        Returns the registration code redemption object if found else returns None.
+        Returns a queryset of redemption objects for the given registration code.
+
+        An enrollment code may be redeemed more than once, so multiple (and
+        possibly orphaned) redemption rows can exist for a single code.
         """
-        try:
-            code_redemption = cls.objects.get(registration_code__code=code, registration_code__course_id=course_id)
-        except cls.DoesNotExist:
-            code_redemption = None
-        return code_redemption
+        return cls.objects.filter(
+            registration_code__code=code,
+            registration_code__course_id=course_id,
+        ).order_by("-id")
 
     @classmethod
     def create_invoice_generated_registration_redemption(cls, course_reg_code, user):  # pylint: disable=invalid-name
